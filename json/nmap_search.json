@@ -1,0 +1,19 @@
+{
+"query": {
+    "bool": {
+      "must": [{ "match": { "script": "httpx" } }],
+      "filter": [
+            {"exists": { "field": "script_output" } },
+            {"range": { "time": { "gte": "now-24h", "lte": "now", "format": "epoch_millis" } } }
+      ]
+    }
+  },
+"aggs": {
+    "script_output": {
+      "terms": {
+        "field": "script_output.keyword"
+      }
+    }
+  },
+ "_source": ["script_output"]
+}
