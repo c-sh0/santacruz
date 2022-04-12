@@ -1,0 +1,42 @@
+version: "3.3"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ESK_VERSION}
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - ELASTIC_PASSWORD=${ESK_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,z
+      - ./esdata:/usr/share/elasticsearch/data:rw,z
+    ports:
+      - 9200:9200
+      - 9300:9300
+    network_mode: "host"
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:${ESK_VERSION}
+    environment:
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ESK_PASSWORD}
+      - ELASTICSEARCH_HOSTS=http://localhost:9200
+    volumes:
+      - ./conf/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,z
+    ports:
+      - 5601:5601
+    network_mode: "host"
+    depends_on:
+      - elasticsearch
+
