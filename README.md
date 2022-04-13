@@ -18,7 +18,7 @@ Start Elasticsearch and Kibana containers. The easiest approach when settings pa
 4. Start Kibana container (&& watch logs to make sure it starts)<br>
    ```docker-compose up -d kibana && docker logs kibana --follow```
 
-5. Login into the Kibana dashboard (user: elastic)<br>
+5. Login into the Kibana dashboard (user: elastic, password from #2)<br>
    ```http://your.ip:5601/```
 
 6. (Optional) Add additional users: **Stack Management** -> **Users**
