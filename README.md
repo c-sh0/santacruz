@@ -14,10 +14,9 @@ Start Elasticsearch and Kibana containers. The easiest approach when settings pa
    ```sh
    docker exec elasticsearch /bin/bash -c "bin/elasticsearch-setup-passwords auto --batch"
    ```
-3. Update configuration files with the generated passwords from #2
+3. Update Kibana configuration with generated password from #2
    ```sh
    conf/kibana.yml
-   conf/nuclei-es-config.yaml
    ```
 4. Start Kibana container (&& watch logs to make sure it starts)
    ```sh
