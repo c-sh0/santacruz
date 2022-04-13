@@ -13,4 +13,4 @@ elasticsearch:
   # Username for the elasticsearch instance
   username: elastic
   # Password is the password for elasticsearch instance
-  password: 0ChAng311Th1SPw123
+  password: changeme
