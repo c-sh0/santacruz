@@ -4,6 +4,9 @@
 # [/csh:]> date "+%D"
 # 04/11/22
 # https://github.com/c-sh0
+#
+# nmap has yet to add a json output feature
+# https://github.com/nmap/nmap/issues/635
 # ========================================================================================
 import sys
 import json
