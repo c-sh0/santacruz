@@ -10,7 +10,9 @@ description = [[
 httpx is a fast and multi-purpose HTTP toolkit allow to run multiple probers using retryablehttp library, it is designed to maintain the result reliability with increased threads.
 https://github.com/projectdiscovery/httpx
 ]]
-
+--
+-- Reason for this script?
+--  : https://github.com/nmap/nmap/issues/2395
 --
 -- Requires httpx
 -- nmap target --script=httpx --script-args httpx_bin=/path/to/httpx
@@ -23,7 +25,7 @@ https://github.com/projectdiscovery/httpx
 -- | httpx:
 -- |_  http://192.168.1.229:5601 [302] [/login?next=%2F] [] [Elasticsearch,Kibana,Node.js]
 --
-
+--
 author = "c-sh0"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
 categories = {"safe", "discovery"}
