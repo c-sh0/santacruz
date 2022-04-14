@@ -1,12 +1,12 @@
-# Scanpan
+# Santacruz
 Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 
 ## Description
 Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features i'll never use nor care about. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
 
 ## Getting Started
-### Prerequisites
-#### Prepare the host
+```git clone https://github.com/c-sh0/santacruz.git```
+### Prepare
 * Increase virtual memory for Elasticsearch<br> https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html<br>
    ```sysctl -w vm.max_map_count=262144```<br>
    ```echo 'vm.max_map_count=262144' >> /etc/sysctl.conf```<br>
@@ -15,7 +15,7 @@ Having to write custom shell scripts to parse and keep track of all the data fro
    ```mkdir -p ./data/elasticsearch ./data/kibana```<br>
    ```chown 1000:1000 ./data/elasticsearch ./data/kibana```<br>
 
-#### Start Elasticsearch and Kibana containers
+### Start Elasticsearch and Kibana containers
 The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later. https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
 1. Start Elasticsearch container (&& watch logs to make sure it starts)<br>
   ```docker-compose up -d elasticsearch && docker logs elasticsearch --follow```
