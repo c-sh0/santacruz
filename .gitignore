@@ -1,8 +1,9 @@
-.git/
-esdata/
+conf/
+data/
 nuclei_templates/
 .idea/
 .vscode/
+.git/
 .env
 *.sw*
 *.swp
@@ -15,4 +16,5 @@ nuclei_templates/
 *.dylib
 *.test
 *.out
-
+*.txt
+*.log
