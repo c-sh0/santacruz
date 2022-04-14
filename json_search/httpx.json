@@ -1,4 +1,5 @@
 {
+"size": 500,
 "query": {
     "bool": {
       "must": [{ "match": { "script": "httpx" } }],
