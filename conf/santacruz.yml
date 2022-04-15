@@ -1,11 +1,11 @@
-# elasticsearch contains configuration options for elasticsearch exporter
+# options for elasticsearch
+# nuclei compatible format see: issue-tracker-config.yaml
+# https://github.com/projectdiscovery/nuclei
 elasticsearch:
-#  # IP for elasticsearch instance
+  # IP for elasticsearch instance
   ip: 127.0.0.1
   # Port is the port of elasticsearch instance
   port: 9200
-  # IndexName is the name of the elasticsearch index
-  index-name: nuclei
   # SSL enables ssl for elasticsearch connection
   ssl: false
   # SSLVerification disables SSL verification for elasticsearch
@@ -14,3 +14,5 @@ elasticsearch:
   username: elastic
   # Password is the password for elasticsearch instance
   password: changeme
+  # nuclei elasticsearch index name
+  index-name: nuclei

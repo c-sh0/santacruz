@@ -74,7 +74,7 @@ def sendToEs(xml_root,ES_session,api_url,verbose):
                           if not 'hostname' in dict_item:
                              dict_item['hostname'] = "unknwon"
 
-                          # Gererate a uniq index ID (prevent duplicate documents)
+                          # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
                           # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
                           # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
                           index_uuid = uuid_from_string(json.dumps(dict_item))

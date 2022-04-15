@@ -18,12 +18,12 @@ https://github.com/projectdiscovery/httpx
 -- nmap target --script=httpx --script-args httpx_bin=/path/to/httpx
 --
 -- @output
--- Nmap scan report for local-dev.lan (192.168.1.229)
+-- Nmap scan report for dev.lan (192.168.1.10)
 -- Host is up (0.000048s latency).
 -- PORT     STATE SERVICE
 -- 5601/tcp open  unknown
 -- | httpx:
--- |_  http://192.168.1.229:5601 [302] [/login?next=%2F] [] [Elasticsearch,Kibana,Node.js]
+-- |_  http://192.168.1.10:5601 [302] [/login?next=%2F] [] [Elasticsearch,Kibana,Node.js]
 --
 --
 author = "c-sh0"
