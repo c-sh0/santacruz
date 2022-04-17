@@ -1,5 +1,10 @@
-# options for elasticsearch
-# nuclei compatible format see: issue-tracker-config.yaml
+# Configuration file for santasearch.py
+# List of tool data stored in ES
+tool_list: ["httpx","nmap","nuclei"]
+# Format search results
+output_fomats: ["table","json","csv"]
+#
+# Elasticsearch configuration (nuclei compatible: issue-tracker-config.yaml)
 # https://github.com/projectdiscovery/nuclei
 elasticsearch:
   # IP for elasticsearch instance
