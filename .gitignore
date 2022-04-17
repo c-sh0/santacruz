@@ -3,6 +3,7 @@ nuclei_templates/
 .idea/
 .vscode/
 .git/
+resume.cfg
 .env
 *.sw*
 *.swp
