@@ -38,6 +38,7 @@ def nuclei_bldq(es_host,ip_addr,stime,etime,slimit):
                                  "event.info.name", "event.matched-at", "event.template-id",
                                  "event.info.classification.cvss-score", "event.info.description"]
              },
+             "sort": [{ "@timestamp": "asc" }],
              "size": slimit
       }
 
@@ -62,6 +63,7 @@ def nmap_bldq(es_host,ip_addr,stime,etime,slimit):
               "_source": {
                   "includes": ["time","ip","port","protocol","script","script_output"]
              },
+             "sort": [{ "time": "asc" }],
              "size": slimit
       }
 
@@ -71,8 +73,10 @@ def nmap_bldq(es_host,ip_addr,stime,etime,slimit):
 
     return _dict
 
+#-----------------------------
 # httpx is called from nmap nse (httpx.nse)
 # aggregation note:
+#-----------------------------
 # "aggs": {
 #    "script_output": {
 #      "terms": {
@@ -97,6 +101,7 @@ def httpx_bldq(es_host,ip_addr,stime,etime,slimit):
               "_source": {
                   "includes": ["time","script","script_output"]
              },
+             "sort": [{ "time": "asc" }],
              "size": slimit
       }
 
@@ -180,9 +185,101 @@ def init_sc(args):
         elif tool == 'nuclei':
            opts['nuclei'] = nuclei_bldq(opts['es_host'],args.addr,args.start,args.end,args.limit)
 
+    if args.output not in conf['output_fomats']:
+       print(f"[ERROR]: Unknown output format: \"{args.output}\", check {args.config.name}")
+       return sys.exit(-1)
+
     opts['oformat'] = args.output
 
     return opts
+
+def es_nmap(ss):
+    r = ss['es_session'].post(ss['nmap']['_uri'], data=json.dumps(ss['nmap']['_search']), verify=False)
+    if r.status_code != 200:
+       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
+       return sys.exit(-1)
+
+    if not len(r.json()):
+       print(f"Num Results: 0")
+       return 0
+
+    #print(r.json()['hits']['hits'])
+    data = r.json()['hits']['hits']
+
+    if ss['oformat'] == 'json':
+       print(json.dumps(data))
+       return data
+
+    print(f"\n")
+    for j in data:
+       for k in j:
+          if ss['oformat'] == 'tab':
+             print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
+
+          elif ss['oformat'] == 'csv':
+             print(f"{j[k]['time']},{j[k]['ip']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
+
+    print(f"\n")
+    return data
+
+def es_httpx(ss):
+    r = ss['es_session'].post(ss['httpx']['_uri'], data=json.dumps(ss['httpx']['_search']), verify=False)
+    if r.status_code != 200:
+       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
+       return sys.exit(-1)
+
+    if not len(r.json()):
+       print(f"Num Results: 0")
+       return 0
+
+    #print(r.json()['hits']['hits'])
+    data = r.json()['hits']['hits']
+
+    if ss['oformat'] == 'json':
+       print(json.dumps(data))
+       return data
+
+    print(f"\n")
+    for j in data:
+       for k in j:
+          if ss['oformat'] == 'tab':
+             print(f"{j[k]['time']}\t{j[k]['script']}\t{j[k]['script_output']}")
+
+          elif ss['oformat'] == 'csv':
+             print(f"{j[k]['time']},{j[k]['script']},{j[k]['script_output']}")
+
+    print(f"\n")
+    return data
+
+def es_nuclei(ss):
+
+    r = ss['es_session'].post(ss['nuclei']['_uri'], data=json.dumps(ss['nuclei']['_search']), verify=False)
+    if r.status_code != 200:
+       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
+       return sys.exit(-1)
+
+    if not len(r.json()):
+       print(f"Num Results: 0")
+       return 0
+
+    #print(r.json()['hits']['hits'])
+    data = r.json()['hits']['hits']
+
+    if ss['oformat'] == 'json':
+       print(json.dumps(data))
+       return data
+
+    print(f"\n")
+    for j in data:
+       for k in j:
+          if ss['oformat'] == 'tab':
+             print(f"{j[k]['@timestamp']}\t{j[k]['event']['ip']}\t{j[k]['event']['matched-at']}\t{j[k]['event']['template-id']}\t{j[k]['event']['info']['severity']}\t{j[k]['event']['info']['name']}")
+
+          elif ss['oformat'] == 'csv':
+             print(f"{j[k]['@timestamp']},{j[k]['event']['ip']},{j[k]['event']['matched-at']},{j[k]['event']['template-id']},{j[k]['event']['info']['severity']},{j[k]['event']['info']['name']}")
+
+    print(f"\n")
+    return data
 
 def main():
     parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
@@ -191,14 +288,27 @@ def main():
     parser.add_argument('-s', '--start', help='Search from start time (default: now-24h)', default="now-24h", dest='start', metavar='[date]', action='store')
     parser.add_argument('-e', '--end',   help='Search to end time (default: now)', default="now", dest='end', metavar='[date]', action='store')
     parser.add_argument('-l', '--limit', help='Limit number of results (default: 100)', default=100, dest='limit', metavar='[limit]', action='store', type=int)
-    parser.add_argument('-o', '--output', help='Output format (default: txt)', default="txt", dest='output', metavar='[format]', action='store')
+    parser.add_argument('-o', '--output', help='Output format (default: tab)', default="tab", dest='output', metavar='[format]', action='store')
     parser.add_argument('-t', '--tool', help='Search for data based on tool name (default: all)', default="all", dest='tool', metavar='[name]', action='store')
     parser.add_argument('-v', '--verbose', help='Verbose output', action="store_true")
 
     opt_args = parser.parse_args()
     sc_session = init_sc(opt_args)
 
-    print(sc_session)
+    if sc_session['tool'] == 'nmap':
+       es_nmap(sc_session)
+
+    elif sc_session['tool'] == 'httpx':
+       es_httpx(sc_session)
+
+    elif sc_session['tool'] == 'nuclei':
+       es_nuclei(sc_session)
+
+    elif sc_session['tool'] == 'all':
+       es_nmap(sc_session)
+       es_httpx(sc_session)
+       es_nuclei(sc_session)
+
 
 if __name__ == "__main__":
         main()
