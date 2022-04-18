@@ -2,7 +2,7 @@
 # List of tool data stored in ES
 tool_list: ["httpx","nmap","nuclei"]
 # Format search results
-output_fomats: ["table","json","csv"]
+output_fomats: ["tab","json","csv"]
 #
 # Elasticsearch configuration (nuclei compatible: issue-tracker-config.yaml)
 # https://github.com/projectdiscovery/nuclei
