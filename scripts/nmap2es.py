@@ -17,6 +17,8 @@ import requests
 import base64
 import hashlib
 import uuid
+import yaml
+import re
 import xml.etree.ElementTree as xml
 from urllib.parse import urlparse
 ###
@@ -67,7 +69,8 @@ def sendToEs(xml_root,ES_session,api_url,verbose):
                                if p.attrib['id']:
                                   if p.attrib['output']:
                                      dict_item['script'] = p.attrib['id']
-                                     dict_item['script_output'] = p.attrib['output'].strip()
+                                     s  = p.attrib['output'].replace('\n','')
+                                     dict_item['script_output'] = re.sub('\\\\x00', '', s)
 
                        if dict_item['state'] == 'open':
                           ## fill in some empty values
@@ -121,52 +124,36 @@ def init_ESSession(user,passwd,api_URL,verbose):
     return session
 
 def main():
-    # Defaults
-    es_user = ''
-    es_pass = ''
-    es_index = 'nmap'
-    es_host = 'http://localhost:9200'
-
     parser = argparse.ArgumentParser(description='Import nmap XML output into Elasticsearch')
-    parser.add_argument('-f', '--file', help='nmap XML input file', type=argparse.FileType('r'))
-    parser.add_argument('-H', '--host', help='Elasticsearch host (default: http://localhost:9200)', type=ascii)
-    parser.add_argument('-i', '--index', help='Elasticsearch index (default: nmap)', type=ascii)
-    parser.add_argument('-u', '--user', help='Elasticsearch username (default: none)', type=ascii)
-    parser.add_argument('-p', '--password', help='Elasticsearch password (default: none)', type=ascii)
-    parser.add_argument('-v', '--verbose', help='Verbose', nargs='?', const=1, default=0, type=int)
-    args = parser.parse_args()
+    parser.add_argument('-c', '--config', help='Path to elasticsearch configuration YML file', dest='config', metavar='[config]', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-f', '--file', help='Path to nmap XML input file', dest='file', metavar='[file]', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-i', '--index', help='Elasticsearch index (default: nmap)', default="nmap", dest='index', metavar='[index]', action='store')
+    parser.add_argument('-v', '--verbose', help='Verbose', action="store_true")
+    opt_args = parser.parse_args()
 
-    if not args.file:
-        parser.print_usage()
-        return sys.exit(-1)
+    conf = yaml.safe_load(opt_args.config)
+    if conf['elasticsearch']['ssl']:
+       es_host = 'https://' + conf['elasticsearch']['ip']
     else:
-        xml_tree = xml.parse(args.file)
-        xml_root = xml_tree.getroot()
-        args.file.close()
+       es_host = 'http://' + conf['elasticsearch']['ip']
 
-    if args.user:
-       es_user = args.user.replace("'","")
+    es_host += ':' + str(conf['elasticsearch']['port'])
+    es_user  = conf['elasticsearch']['username']
+    es_pass  = conf['elasticsearch']['password']
 
-       if not args.password:
-           print(f"[ERROR]: user without password?")
-           parser.print_usage()
-           return sys.exit(-1)
-       else:
-           es_pass = args.password.replace("'","")
+    xml_tree = xml.parse(opt_args.file)
+    xml_root = xml_tree.getroot()
+    opt_args.file.close()
 
-    if args.host:
-       es_host = args.host.lower().replace("'","")
-
-    if args.index:
-       es_index = args.index.lower().replace("'","")
-
-    # ES Session
-    es_session = init_ESSession(es_user,es_pass,es_host,args.verbose)
+    if opt_args.index:
+       es_index = opt_args.index.lower()
 
     # build index URL
     index_URL = es_host + '/' + es_index + '/_doc'
 
-    sendToEs(xml_root,es_session,index_URL,args.verbose)
+    # ES Session
+    es_session = init_ESSession(es_user,es_pass,es_host,opt_args.verbose)
+    sendToEs(xml_root,es_session,index_URL,opt_args.verbose)
 
     print(f"[INFO]: Completed.")
 
