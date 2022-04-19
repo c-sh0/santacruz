@@ -41,12 +41,15 @@ end
 action = function(host, port)
 	local httpx_bin = stdnse.get_script_args({'httpx_bin', 'path'}) or '/root/go/bin/httpx'
 	local httpx_target = host.targetname or host.ip
-	local httpx_cmd = ""..httpx_bin.." -no-color -random-agent -status-code -tech-detect -location -web-server -silent -p "..port.number.." <<< "..httpx_target..""
+	local httpx_cmd = ""..httpx_bin.." -silent -nc -sc -td -fhr -asn -maxr 1 -random-agent -location -web-server -timeout 2 -retries 1 -p "..port.number.." <<< "..httpx_target..""
         local resp_table = stdnse.output_table()
 
         local handle = io.popen(httpx_cmd)
 	local result = handle:read("*a")
 	handle:close()
+
+        -- Remove empty "[]" responses
+        result = result:gsub("%[%] ", "")
 
 	if(result == nil or result == '') then
 		return nil
