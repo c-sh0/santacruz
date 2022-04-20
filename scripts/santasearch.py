@@ -21,96 +21,6 @@ import uuid
 import yaml
 from urllib.parse import urlparse
 
-# nuclei
-def nuclei_bldq(es_host,ip_addr,stime,etime,slimit):
-    _dict = {}
-    _dict['_uri'] = es_host + '/nuclei/_search?filter_path=hits.hits._source'
-
-    _dict['_search'] = {
-              "query": {
-                   "bool": {
-                      "must": [],
-                      "filter": [{"range": {"@timestamp": {"gte": stime, "lte": etime}}}]
-                   }
-              },
-              "_source": {
-                  "includes": ["@timestamp", "event.ip", "event.info.severity",
-                                 "event.info.name", "event.matched-at", "event.template-id",
-                                 "event.info.classification.cvss-score", "event.info.description"]
-             },
-             "sort": [{ "@timestamp": "asc" }],
-             "size": slimit
-      }
-
-    if ip_addr:
-       match_ip = {"match": {"event.ip": ip_addr}}
-       _dict['_search']['query']['bool']['must'].append(match_ip)
-
-    return _dict
-
-# nmap
-def nmap_bldq(es_host,ip_addr,stime,etime,slimit):
-    _dict = {}
-    _dict['_uri'] = es_host + '/nmap/_search?filter_path=hits.hits._source'
-
-    _dict['_search'] = {
-              "query": {
-                   "bool": {
-                      "must": [],
-                      "filter": [{"range": {"time": {"gte": stime, "lte": etime}}}]
-                   }
-              },
-              "_source": {
-                  "includes": ["time","ip","port","protocol","script","script_output"]
-             },
-             "sort": [{ "time": "asc" }],
-             "size": slimit
-      }
-
-    if ip_addr:
-       match_ip = {"match": {"ip": ip_addr}}
-       _dict['_search']['query']['bool']['must'].append(match_ip)
-
-    return _dict
-
-#-----------------------------
-# httpx is called from nmap nse (httpx.nse)
-# aggregation note:
-#-----------------------------
-# "aggs": {
-#    "script_output": {
-#      "terms": {
-#        "field": "script_output.keyword"
-#      }
-#    }
-#  },
-def httpx_bldq(es_host,ip_addr,stime,etime,slimit):
-    _dict = {}
-    _dict['_uri'] = es_host + '/nmap/_search?filter_path=hits.hits._source'
-
-    _dict['_search'] = {
-              "query": {
-                   "bool": {
-                      "must": [{"match": {"script": "httpx"}}],
-                      "filter": [
-                          {"exists": {"field": "script_output"}},
-                          {"range": {"time": {"gte": stime, "lte": etime}}}
-                      ]
-                   }
-              },
-              "_source": {
-                  "includes": ["time","script","script_output"]
-             },
-             "sort": [{ "time": "asc" }],
-             "size": slimit
-      }
-
-    if ip_addr:
-       match_ip = {"match": {"ip": ip_addr}}
-       _dict['_search']['query']['bool']['must'].append(match_ip)
-
-    return _dict
-
 def get_indexes(es_session,es_host,verbose):
     index_URI = es_host + '/_cat/indices?h=index&format=json'
     index_arr = []
@@ -149,136 +59,104 @@ def init_ESsession(user,passwd,api_URL,verbose):
 
     return session
 
-def init_sc(args):
-    opts = {}
-    opts['verbose'] = args.verbose
+def prepare_ss(opt_args):
+    sc_data = {}
+    tool_data = {}
+    sc_data['verbose'] = opt_args.verbose
+    sc_data['oformat'] = opt_args.output
 
-    conf = yaml.safe_load(args.config)
-    if conf['elasticsearch']['ssl']:
-       opts['es_host'] = 'https://' + conf['elasticsearch']['ip']
+    output_formats = ['tab','csv','json']
+    if sc_data['oformat'] not in output_formats:
+       print(f"[ERROR]: Unknown output format: \"{opt_args.output}\"")
+       return sys.exit(-1)
+
+    # read config
+    yml_conf = yaml.safe_load(opt_args.config)
+
+    if yml_conf['elasticsearch']['ssl']:
+       sc_data['es_host'] = 'https://' + yml_conf['elasticsearch']['ip']
     else:
-       opts['es_host'] = 'http://' + conf['elasticsearch']['ip']
+       sc_data['es_host'] = 'http://' + yml_conf['elasticsearch']['ip']
 
-    opts['es_host'] += ':' + str(conf['elasticsearch']['port'])
-    opts['es_user']  = conf['elasticsearch']['username']
-    opts['es_pass']  = conf['elasticsearch']['password']
+    sc_data['es_host'] += ':' + str(yml_conf['elasticsearch']['port'])
+    sc_data['es_user']  = yml_conf['elasticsearch']['username']
+    sc_data['es_pass']  = yml_conf['elasticsearch']['password']
 
-    # ES Session
-    opts['es_session'] = init_ESsession(opts['es_user'],opts['es_pass'],opts['es_host'],opts['verbose'])
-
-    if args.tool != 'all':
-       if args.tool not in conf['tool_list']:
-          print(f"[ERROR]: Unknown tool: \"{args.tool}\", check {args.config.name}")
+    if opt_args.tool != 'all':
+       if opt_args.tool not in yml_conf['sc_tools']:
+          print(f"[ERROR]: Unknown tool: \"{opt_args.tool}\".")
           return sys.exit(-1)
 
-    # Index uri based on configured tools
-    opts['tool']      = args.tool
-    opts['tool_list'] = conf['tool_list']
+    sc_data['search'] = {}
+    for tool in yml_conf['sc_tools']:
+        tool_data[tool] = yml_conf['sc_tools'][tool]
+        tool_data[tool]['_esquery']['size'] = opt_args.limit
 
-    for tool in opts['tool_list']:
         if tool == 'nmap':
-           opts['nmap'] = nmap_bldq(opts['es_host'],args.addr,args.start,args.end,args.limit)
+            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": opt_args.start, "lte": opt_args.end}}}]
+
+            if opt_args.addr:
+               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"ip": opt_args.addr}}]
 
         elif tool == 'httpx':
-           opts['httpx'] = httpx_bldq(opts['es_host'],args.addr,args.start,args.end,args.limit)
+            tool_data[tool]['_esquery']['query']['bool']['filter'].append({"range": {"time": {"gte": opt_args.start, "lte": opt_args.end}}})
+
+            if opt_args.addr:
+               tool_data[tool]['_esquery']['query']['bool']['must'].append({"match": {"ip": opt_args.addr}})
 
         elif tool == 'nuclei':
-           opts['nuclei'] = nuclei_bldq(opts['es_host'],args.addr,args.start,args.end,args.limit)
+            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"@timestamp": {"gte": opt_args.start, "lte": opt_args.end}}}]
 
-    if args.output not in conf['output_fomats']:
-       print(f"[ERROR]: Unknown output format: \"{args.output}\", check {args.config.name}")
-       return sys.exit(-1)
+            if opt_args.addr:
+               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"event.ip": opt_args.addr}}]
 
-    opts['oformat'] = args.output
+    if opt_args.tool != 'all':
+       sc_data['search'][opt_args.tool] = tool_data[opt_args.tool]
+    else:
+       for tool in yml_conf['sc_tools']:
+           sc_data['search'][tool] = tool_data[tool]
 
-    return opts
+    return sc_data
 
-def es_nmap(ss):
-    r = ss['es_session'].post(ss['nmap']['_uri'], data=json.dumps(ss['nmap']['_search']), verify=False)
+def print_ESdata(tool_name,data,oformat):
+
+    if oformat == 'json':
+       print(json.dumps(data))
+       return 1
+
+    for j in data:
+       for k in j:
+           if tool_name == 'nmap':
+               if oformat == 'tab':
+                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
+               elif oformat == 'csv':
+                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
+
+           elif tool_name == 'httpx':
+               if oformat == 'tab':
+                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['script_output']}")
+               elif oformat == 'csv':
+                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['script_output']}")
+
+           elif tool_name == 'nuclei':
+               if oformat == 'tab':
+                  print(f"{j[k]['@timestamp']}\t{j[k]['event']['ip']}\t{j[k]['event']['matched-at']}\t{j[k]['event']['template-id']}\t{j[k]['event']['info']['severity']}\t{j[k]['event']['info']['name']}")
+               elif oformat == 'csv':
+                  print(f"{j[k]['@timestamp']},{j[k]['event']['ip']},{j[k]['event']['matched-at']},{j[k]['event']['template-id']},{j[k]['event']['info']['severity']},{j[k]['event']['info']['name']}")
+    return 0
+
+def ESquery(es_conn,es_host,es_data):
+    es_uri = es_host + '/' + es_data['_esindex'] + '/_search?filter_path=hits.hits._source'
+
+    r = es_conn.post(es_uri, data=json.dumps(es_data['_esquery']), verify=False)
     if r.status_code != 200:
        print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
        return sys.exit(-1)
 
     if not len(r.json()):
-       print(f"Num Results: 0")
-       return 0
+       return {}
 
-    #print(r.json()['hits']['hits'])
     data = r.json()['hits']['hits']
-
-    if ss['oformat'] == 'json':
-       print(json.dumps(data))
-       return data
-
-    print(f"\n")
-    for j in data:
-       for k in j:
-          if ss['oformat'] == 'tab':
-             print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
-
-          elif ss['oformat'] == 'csv':
-             print(f"{j[k]['time']},{j[k]['ip']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
-
-    print(f"\n")
-    return data
-
-def es_httpx(ss):
-    r = ss['es_session'].post(ss['httpx']['_uri'], data=json.dumps(ss['httpx']['_search']), verify=False)
-    if r.status_code != 200:
-       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
-       return sys.exit(-1)
-
-    if not len(r.json()):
-       print(f"Num Results: 0")
-       return 0
-
-    #print(r.json()['hits']['hits'])
-    data = r.json()['hits']['hits']
-
-    if ss['oformat'] == 'json':
-       print(json.dumps(data))
-       return data
-
-    print(f"\n")
-    for j in data:
-       for k in j:
-          if ss['oformat'] == 'tab':
-             print(f"{j[k]['time']}\t{j[k]['script']}\t{j[k]['script_output']}")
-
-          elif ss['oformat'] == 'csv':
-             print(f"{j[k]['time']},{j[k]['script']},{j[k]['script_output']}")
-
-    print(f"\n")
-    return data
-
-def es_nuclei(ss):
-
-    r = ss['es_session'].post(ss['nuclei']['_uri'], data=json.dumps(ss['nuclei']['_search']), verify=False)
-    if r.status_code != 200:
-       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
-       return sys.exit(-1)
-
-    if not len(r.json()):
-       print(f"Num Results: 0")
-       return 0
-
-    #print(r.json()['hits']['hits'])
-    data = r.json()['hits']['hits']
-
-    if ss['oformat'] == 'json':
-       print(json.dumps(data))
-       return data
-
-    print(f"\n")
-    for j in data:
-       for k in j:
-          if ss['oformat'] == 'tab':
-             print(f"{j[k]['@timestamp']}\t{j[k]['event']['ip']}\t{j[k]['event']['matched-at']}\t{j[k]['event']['template-id']}\t{j[k]['event']['info']['severity']}\t{j[k]['event']['info']['name']}")
-
-          elif ss['oformat'] == 'csv':
-             print(f"{j[k]['@timestamp']},{j[k]['event']['ip']},{j[k]['event']['matched-at']},{j[k]['event']['template-id']},{j[k]['event']['info']['severity']},{j[k]['event']['info']['name']}")
-
-    print(f"\n")
     return data
 
 def main():
@@ -291,24 +169,19 @@ def main():
     parser.add_argument('-o', '--output', help='Output format (default: tab)', default="tab", dest='output', metavar='[format]', action='store')
     parser.add_argument('-t', '--tool', help='Search for data based on tool name (default: all)', default="all", dest='tool', metavar='[name]', action='store')
     parser.add_argument('-v', '--verbose', help='Verbose output', action="store_true")
-
     opt_args = parser.parse_args()
-    sc_session = init_sc(opt_args)
 
-    if sc_session['tool'] == 'nmap':
-       es_nmap(sc_session)
+    # parse main configuration file and options
+    ss_data  = prepare_ss(opt_args)
 
-    elif sc_session['tool'] == 'httpx':
-       es_httpx(sc_session)
+    # ES Session
+    es_session = init_ESsession(ss_data['es_user'],ss_data['es_pass'],ss_data['es_host'],ss_data['verbose'])
 
-    elif sc_session['tool'] == 'nuclei':
-       es_nuclei(sc_session)
+    for tool in ss_data['search']:
+        results = ESquery(es_session,ss_data['es_host'],ss_data['search'][tool])
 
-    elif sc_session['tool'] == 'all':
-       es_nmap(sc_session)
-       es_httpx(sc_session)
-       es_nuclei(sc_session)
-
+        if len(results):
+            print_ESdata(tool,results,ss_data['oformat'])
 
 if __name__ == "__main__":
         main()
