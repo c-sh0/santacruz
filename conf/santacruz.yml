@@ -1,11 +1,10 @@
-# Configuration file for santasearch.py
-# List of tool data stored in ES
-tool_list: ["httpx","nmap","nuclei"]
-# Format search results
-output_fomats: ["tab","json","csv"]
-#
-# Elasticsearch configuration (nuclei compatible: issue-tracker-config.yaml)
-# https://github.com/projectdiscovery/nuclei
+#----------------------------#
+# santasearch configuration  #
+#--------------------------------------------------#
+# Elasticsearch (compatibility with nuclei)        #
+# See: issue-tracker-config.yaml                   #
+# https://github.com/projectdiscovery/nuclei       #
+#--------------------------------------------------#
 elasticsearch:
   # IP for elasticsearch instance
   ip: 127.0.0.1
@@ -21,3 +20,55 @@ elasticsearch:
   password: changeme
   # nuclei elasticsearch index name
   index-name: nuclei
+######################################################
+#---------------------------#
+# Tools and ES json queries #
+#- -------------------------#
+sc_tools: {
+   nmap: {
+     "_esindex": "nmap",
+     "_esquery": {
+         "query": {
+           "bool": {
+             "must": [],
+           }
+         },
+         "_source": {"includes": ["time","ip","port","protocol","script","script_output"]},
+         "size": 100,
+         "sort": [{"time": "asc" }]
+       }
+   },
+
+   httpx: {
+     "_esindex": "nmap",
+     "_esquery": {
+         "query": {
+           "bool": {
+             "must": [{"match": {"script": "httpx"}}],
+             "filter": [{"exists": {"field": "script_output"}}]
+           }
+         },
+         "_source": {"includes": ["time","ip","script","script_output"]},
+         "size": 100,
+         "sort": [{"time": "asc" }]
+       }
+   },
+
+   nuclei: {
+     "_esindex": "nuclei",
+     "_esquery": {
+         "query": {
+           "bool": {
+             "must": [],
+           }
+         },
+         "_source": {
+         "includes": ["@timestamp", "event.ip", "event.info.severity",
+                      "event.info.name", "event.matched-at", "event.template-id",
+                      "event.info.classification.cvss-score", "event.info.description"]
+         },
+         "size": 100,
+         "sort": [{"@timestamp": "asc"}]
+       }
+   }
+}
