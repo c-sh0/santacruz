@@ -16,8 +16,6 @@ import json
 import argparse
 import requests
 import base64
-#import hashlib
-#import uuid
 import re
 import yaml
 from urllib.parse import urlparse
