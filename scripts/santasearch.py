@@ -11,13 +11,14 @@
 # ========================================================================================
 import os
 import sys
-import json
 import time
+import json
 import argparse
 import requests
 import base64
-import hashlib
-import uuid
+#import hashlib
+#import uuid
+import re
 import yaml
 from urllib.parse import urlparse
 
@@ -70,6 +71,10 @@ def prepare_ss(opt_args):
        print(f"[ERROR]: Unknown output format: \"{opt_args.output}\"")
        return sys.exit(-1)
 
+    # convert date/time to epoch or default
+    stime = chk_timef(opt_args.start)
+    etime = chk_timef(opt_args.end)
+
     # read config
     yml_conf = yaml.safe_load(opt_args.config)
 
@@ -93,19 +98,19 @@ def prepare_ss(opt_args):
         tool_data[tool]['_esquery']['size'] = opt_args.limit
 
         if tool == 'nmap':
-            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": opt_args.start, "lte": opt_args.end}}}]
+            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": stime, "lte": etime}}}]
 
             if opt_args.addr:
                tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"ip": opt_args.addr}}]
 
         elif tool == 'httpx':
-            tool_data[tool]['_esquery']['query']['bool']['filter'].append({"range": {"time": {"gte": opt_args.start, "lte": opt_args.end}}})
+            tool_data[tool]['_esquery']['query']['bool']['filter'].append({"range": {"time": {"gte": stime, "lte": etime}}})
 
             if opt_args.addr:
                tool_data[tool]['_esquery']['query']['bool']['must'].append({"match": {"ip": opt_args.addr}})
 
         elif tool == 'nuclei':
-            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"@timestamp": {"gte": opt_args.start, "lte": opt_args.end}}}]
+            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"@timestamp": {"gte": stime, "lte": etime}}}]
 
             if opt_args.addr:
                tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"event.ip": opt_args.addr}}]
@@ -158,6 +163,28 @@ def ESquery(es_conn,es_host,es_data):
 
     data = r.json()['hits']['hits']
     return data
+
+# check and/or convert to epoch
+def chk_timef(st):
+    t = False
+    os.environ['TZ'] = 'UTC'
+    m1 = re.compile('[0-9]{4}/[0-9]{2}/[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2}')
+    m2 = re.compile('[0-9]{4}/[0-9]{2}/[0-9]{2}')
+    m3 = re.compile('(now$|now-[0-9]+(d|w|m|h|y)$)')
+
+    if m1.match(st):
+       p = '%Y/%m/%d %H:%M:%S'
+       t = int(time.mktime(time.strptime(st,p)) * 1000.0)
+    elif m2.match(st):
+       p = '%Y/%m/%d'
+       t = int(time.mktime(time.strptime(st,p)) * 1000.0)
+    elif m3.match(st):
+       return st
+    else:
+       print(f"[ERROR]: Invalid end datetime format \"{st}\" [YYYY/MM/DD HH:MM:SS || now|now-N(d|w|m|h|y)]")
+       return sys.exit(-1)
+
+    return t
 
 def main():
     parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
