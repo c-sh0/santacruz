@@ -7,7 +7,7 @@ Helper scripts
 | santasearch.py  | Retrieves Elasticsearch data based on tool (nmap, httpx, nuclei, etc..) |
 
 ## nmap2es.py
-A simple script that will convert Nmap's XML scan results into json and then forwards that data into Elasticsearch. Unfortunately Nmap has yet to implent json output so, we need a script to convert the XML into Json. (c'mon nmap, it's 2022!)
+A simple script that will convert Nmap's XML scan results into json and then forwards that data into Elasticsearch. Unfortunately Nmap has yet to implent json output so, we need a script to convert the XML into Json. (c'mon nmap team, it's 2022!)
 ```yaml
 usage: nmap2es.py [-h] -c [config] -f [file] [-i [index]] [-v]
 optional arguments:
