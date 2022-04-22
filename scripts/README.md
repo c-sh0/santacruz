@@ -19,7 +19,7 @@ optional arguments:
 ```
 
 ## santasearch.py
-A simple script to retrieve tool output data from Elasticsearch. Useful for reporting and/or importing data into other tools. This script reads the json query configuration for each configured tool listed in `conf/santacruz.yml` 
+A simple script to retrieve tool output data from Elasticsearch. Useful for reporting and/or importing data into other tools. This script reads the elasticsearch and  the query configurations for each configured tool from `conf/santacruz.yml` 
 ```yaml
 usage: santasearch.py [-h] -c  [-a] [-l] [-o] [-t] [-s] [-e] [-v]
 optional arguments:
