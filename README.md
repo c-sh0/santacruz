@@ -59,7 +59,7 @@ Nuclei has native support for Elasticsearch
    ```
 
 ## Viewing data
-Since your data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output into other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
+Since the data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output for use with other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
 
 ## Todo
    * More stuff
