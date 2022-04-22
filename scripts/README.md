@@ -35,4 +35,19 @@ optional arguments:
                                    [YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)
   -v, --verbose                 :- Verbose output
 ```
+Example [datetime] filter formats
 
+|From Start (-s) |To End (-e) | Display|
+| :------------- | :------------- |:------------- |
+|now       | now |  Today|
+|now-15m   | now |  Last 15 minutes|
+|now-30m   | now |  Last 30 minutes|
+|now-1h    | now |  Last 1 hour|
+|now-24h   | now |  Last 24 hours|
+|now-1w    | now |  Last week|
+|now-7d    | now |  Last 7 days|
+|now-30d   | now |  Last 30 days|
+|now-90d   | now |  Last 90 days|
+|now-1y    | now-15d |  Last 1 year minus 15 days|
+|2022/10/03 | 2022/10/08| Oct 03 2022 <-> Oct 08 2022|
+|2022/10/17 03:01:22| 2022/11/20 10:02:33| Oct 17 03:01:22 <-> Nov 20 2022 10:02:33|  
