@@ -51,18 +51,22 @@ optional arguments:
   -i [index], --index [index]    Elasticsearch index (default: nmap)
   -v, --verbose                  Verbose
 ```
-*See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
-
-```nmap --open -oX data/nmap/nmap_scan.xml <target>```
-```nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml```
+*See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*<br><br>
+    ```
+    nmap --open -oX data/nmap/nmap_scan.xml <target>
+    ```  
+    ```
+    nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
+    ```
 
 #### Nmap + Httpx
-Httpx is a great tool for determining if a port is running http(s). Using nmap + `httpx.nse` can save you an extra step during the reconnaissance phase. The script will run httpx on any open tcp ports discovered during the scan. (`nmap2es.py` supports nmap script output)
-```nmap --open -script=nmap_nse/httpx.nse --script-args httpx_bin=/path/to/httpx -oX data/nmap/nmap_scan.xml <target>```
+Httpx is a great tool for determining if a port is running http(s). Using nmap + `httpx.nse` can save you an extra step during the reconnaissance phase. The script will run httpx on any open tcp ports discovered during the scan. (`nmap2es.py` supports nmap script output)<br>
+
+```nmap --open -script=nmap_nse/httpx.nse --script-args httpx_bin=/path/to/httpx -oX data/nmap/nmap_scan.xml <target>```<br>
 ```nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml```
 
 #### Nuclei
-Nuclei has native support for Elasticsearch
+Nuclei has native support for Elasticsearch  
 ```nuclei -report-config conf/santacruz.yml -u <target>```
 
 ## Viewing and Extracting data
@@ -89,9 +93,10 @@ optional arguments:
 * More stuff
 
 ## References
-Marco Lancini's writeup: <a href="https://www.marcolancini.it/2018/blog-elk-for-nmap/" target="_blank">Offensive ELK: Elasticsearch for Offensive Security</a>
-Elasticsearch: <a href="https://github.com/elastic/elasticsearch" target="_blank">https://github.com/elastic/elasticsearch</a>
-Kibana: <a href="https://github.com/elastic/kibana" target="_blank">https://github.com/elastic/kibana</a>
-Nmap: <a href="https://nmap.org/" target="_blank">https://nmap.org/</a>
-Project Discovery: <a href="https://github.com/projectdiscovery" target="_blank">https://github.com/projectdiscovery</a>
+Marco Lancini's writeup: <a href="https://www.marcolancini.it/2018/blog-elk-for-nmap/" target="_blank">Offensive ELK: Elasticsearch for Offensive Security</a><br>
+Elasticsearch: <a href="https://github.com/elastic/elasticsearch" target="_blank">https://github.com/elastic/elasticsearch</a><br>
+Kibana: <a href="https://github.com/elastic/kibana" target="_blank">https://github.com/elastic/kibana</a><br>
+Nmap: <a href="https://nmap.org/" target="_blank">https://nmap.org/</a><br>
+Project Discovery: <a href="https://github.com/projectdiscovery" target="_blank">https://github.com/projectdiscovery</a><br>
+
 
