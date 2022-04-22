@@ -58,8 +58,8 @@ Nuclei has native support for Elasticsearch
       nuclei -report-config conf/santacruz.yml -u <target>
    ```
 
-## Viewing and Extracting data
-Since your data now lives in Elasticsearch it can be searched, extracted, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json. This makes it easy for reporting and/or importing into other tools. `santasearch.py` is a command line tool created for doing just that. *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
+## Viewing data
+Since your data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json. This makes it easy for reporting and/or importing into other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
 
 ## Todo
    * More stuff
