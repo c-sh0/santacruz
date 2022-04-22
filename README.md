@@ -8,28 +8,28 @@ Having to write custom shell scripts to parse and keep track of all the data fro
 ```git clone https://github.com/c-sh0/santacruz.git```
 ### Prepare
 * Increase virtual memory for Elasticsearch<br> https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html<br>
-   ```sysctl -w vm.max_map_count=262144```
+   ```sysctl -w vm.max_map_count=262144```<br>
    ```echo 'vm.max_map_count=262144' >> /etc/sysctl.conf```
 
 * Setup the persistent storage volumes. Permissions need to match the elasticsearch and kibana container users, 1000:1000)<br>
-   ```mkdir -p ./data/elasticsearch ./data/kibana```
+   ```mkdir -p ./data/elasticsearch ./data/kibana```<br>
    ```chown 1000:1000 ./data/elasticsearch ./data/kibana```
 
 ### Start Elasticsearch and Kibana containers
-The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later. https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
-1. Start Elasticsearch container (&& watch logs to make sure it starts)
+The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later. https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html  
+1. Start Elasticsearch container (&& watch logs to make sure it starts)<br>
   ```docker-compose up -d elasticsearch && docker logs elasticsearch --follow```
 
-2. Change the default passwords for all built-in users, make note of the output.
+2. Change the default passwords for all built-in users, make note of the output.<br>
    ```docker exec elasticsearch /bin/bash -c "bin/elasticsearch-setup-passwords auto --batch"```
 
-3. Update Kibana configuration with generated password from #2
+3. Update Kibana configuration with generated password from #2<br>
    ```conf/kibana.yml```
 
-4. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)
+4. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)<br>
    ```docker-compose up -d kibana && docker logs kibana --follow```
 
-5. Login into the Kibana dashboard (user: elastic, password from #2)
+5. Login into the Kibana dashboard (user: elastic, password from #2)<br>
    ```http://your.ip:5601/```
 
 6. (Optional) Add additional users: **Stack Management** -> **Users**
