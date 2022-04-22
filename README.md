@@ -5,10 +5,10 @@ Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features i'll never use nor care about. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
 
 # Getting Started
-```sh 
-git clone https://github.com/c-sh0/santacruz.git
-```
-## Prepare
+* Clone
+   ```sh 
+   git clone https://github.com/c-sh0/santacruz.git
+   ```
 * Increase virtual memory for Elasticsearch<br> https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
    ```sh
    sysctl -w vm.max_map_count=262144
@@ -22,31 +22,31 @@ git clone https://github.com/c-sh0/santacruz.git
 ## Start Elasticsearch and Kibana containers
 The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later. https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html  
 1. Start Elasticsearch container (&& watch logs to make sure it starts)
-     ```sh 
-     docker-compose up -d elasticsearch && docker logs elasticsearch --follow
-     ```
+   ```yaml
+   docker-compose up -d elasticsearch && docker logs elasticsearch --follow
+   ```
 2. Change the default passwords for all built-in users, make note of the output.
-   ```sh 
+   ```yaml 
    docker exec elasticsearch /bin/bash -c "bin/elasticsearch-setup-passwords auto --batch"
    ```
 3. Update Kibana configuration with generated password from #2
-   ```sh 
+   ```yaml
    conf/kibana.yml
    ```
 4. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)
-   ```sh 
+   ```yaml
    docker-compose up -d kibana && docker logs kibana --follow
    ```
 5. Login into the Kibana dashboard (user: elastic, password from #2)
-   ```sh 
+   ```yaml
    http://your.ip:5601/
    ```
 6. (Optional) Add additional users: **Stack Management** -> **Users**
 
-# Sending data to Elasticsearch
+## Sending data to Elasticsearch
 Update `conf/santacruz.yml` configuration with generated password from #2 above
 
-### Nmap
+## Nmap
 Nmap doesn't support output in json format (Shame!). The log will need to be converted before being sent to Elasticsearch. Run nmap with the `-oX` to save the ouput in XML format and then Import scan data into Elasticsearch using `nmap2es.py`
 ```yaml
 usage: nmap2es.py [-h] -c [config] -f [file] [-i [index]] [-v]
@@ -60,24 +60,26 @@ optional arguments:
   -i [index], --index [index]    Elasticsearch index (default: nmap)
   -v, --verbose                  Verbose
 ```
-*See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
+> See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information
    ```sh
    nmap --open -oX data/nmap/nmap_scan.xml <target>
    nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
    ```
-### Nmap + Httpx
+   
+## Nmap + Httpx
 Httpx is a great tool for determining if a port is running http(s). Using nmap + `httpx.nse` can save you an extra step during the reconnaissance phase. The script will run httpx on any open tcp ports discovered during the scan. (`nmap2es.py` supports nmap script output)
-   ```sh
+   ```yaml
    nmap --open -script=nmap_nse/httpx.nse --script-args httpx_bin=/path/to/httpx -oX data/nmap/nmap_scan.xml <target>
    nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
    ```
-### Nuclei
+   
+## Nuclei
 Nuclei has native support for Elasticsearch  
-   ```sh
+   ```yaml
    nuclei -report-config conf/santacruz.yml -u <target>
    ```
 
-# Viewing and Extracting data
+## Viewing and Extracting data
 Since your data now lives in Elasticsearch it can be searched, extracted, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json. This makes it easy for reporting and/or importing into other tools. `santasearch.py` is a command line tool created for doing just that.
 ```yaml
 usage: santasearch.py [-h] -c [file] [-a [ip address]] [-s [date]] [-e [date]]
@@ -95,10 +97,10 @@ optional arguments:
   -t [name], --tool [name]     Search for data based on tool name (default: all)
   -v, --verbose                Verbose output
 ```
-*See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
-# Todo
+> See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information
+## Todo
 * More stuff
-# References
+## References
 Marco Lancini's writeup: <a href="https://www.marcolancini.it/2018/blog-elk-for-nmap/" target="_blank">Offensive ELK: Elasticsearch for Offensive Security</a><br>
 Elasticsearch: <a href="https://github.com/elastic/elasticsearch" target="_blank">https://github.com/elastic/elasticsearch</a><br>
 Kibana: <a href="https://github.com/elastic/kibana" target="_blank">https://github.com/elastic/kibana</a><br>
