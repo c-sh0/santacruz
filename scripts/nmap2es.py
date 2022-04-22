@@ -125,10 +125,10 @@ def init_ESSession(user,passwd,api_URL,verbose):
 
 def main():
     parser = argparse.ArgumentParser(description='Import nmap XML output into Elasticsearch')
-    parser.add_argument('-c', '--config', help='Path to santacruz.yml configuration file', dest='config', metavar='[config]', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-f', '--file', help='Path to nmap XML input file', dest='file', metavar='[file]', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-i', '--index', help='Elasticsearch index (default: nmap)', default="nmap", dest='index', metavar='[index]', action='store')
-    parser.add_argument('-v', '--verbose', help='Verbose', action="store_true")
+    parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-f','--file', help='[file]\t:- Path to nmap XML input file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-i','--index', help='[name]\t:- Elasticsearch index (default: nmap)', default="nmap", dest='index', metavar='', action='store')
+    parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action="store_true")
     opt_args = parser.parse_args()
 
     conf = yaml.safe_load(opt_args.config)

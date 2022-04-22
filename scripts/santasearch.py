@@ -186,14 +186,14 @@ def chk_timef(st):
 
 def main():
     parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c', '--config', help='Path to santacruz.yml configuration file', dest='config', metavar='[file]', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-a', '--addr',  help='Search for IP address', dest='addr', metavar='[ip address]', action='store')
-    parser.add_argument('-s', '--start', help='Search from start time [YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='[date]', action='store')
-    parser.add_argument('-e', '--end',   help='Search to end time [YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)', default="now", dest='end', metavar='[date]', action='store')
-    parser.add_argument('-l', '--limit', help='Limit number of results (default: 100)', default=100, dest='limit', metavar='[limit]', action='store', type=int)
-    parser.add_argument('-o', '--output', help='Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='[format]', action='store')
-    parser.add_argument('-t', '--tool', help='Search for data based on tool name (default: all)', default="all", dest='tool', metavar='[name]', action='store')
-    parser.add_argument('-v', '--verbose', help='Verbose output', action="store_true")
+    parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-a','--addr',  help='[ip_addr]\t:- Search for IP address', dest='addr', metavar='', action='store')
+    parser.add_argument('-l','--limit', help='[num]\t\t:- Limit number of results (default: 100)', default=100, dest='limit', metavar='', action='store', type=int)
+    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='', action='store')
+    parser.add_argument('-t','--tool', help='[name]\t:- Search for data based on tool name (default: all)', default="all", dest='tool', metavar='', action='store')
+    parser.add_argument('-s','--start', help='[datetime]\t:- Search from start datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='', action='store')
+    parser.add_argument('-e','--end', help='[datetime]\t:- Search to end datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)', default="now", dest='end', metavar='', action='store')
+    parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action="store_true")
     opt_args = parser.parse_args()
 
     # parse main configuration file and options
