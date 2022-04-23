@@ -33,7 +33,7 @@ sc_tools: {
              "must": [],
            }
          },
-         "_source": {"includes": ["time","ip","port","protocol","script","script_output"]},
+         "_source": {"includes": ["time","ip","hostname","port","protocol","script","script_output"]},
          "size": 100,
          "sort": [{"time": "asc" }]
        }
@@ -48,7 +48,7 @@ sc_tools: {
              "filter": [{"exists": {"field": "script_output"}}]
            }
          },
-         "_source": {"includes": ["time","ip","script","script_output"]},
+         "_source": {"includes": ["time","ip","hostname","script","script_output"]},
          "size": 100,
          "sort": [{"time": "asc" }]
        }

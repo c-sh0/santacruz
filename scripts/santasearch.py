@@ -131,15 +131,15 @@ def print_ESdata(tool_name,data,oformat):
        for k in j:
            if tool_name == 'nmap':
                if oformat == 'tab':
-                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
+                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['hostname']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
                elif oformat == 'csv':
-                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
+                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['hostname']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
 
            elif tool_name == 'httpx':
                if oformat == 'tab':
-                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['script_output']}")
+                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['hostname']}\t{j[k]['script_output']}")
                elif oformat == 'csv':
-                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['script_output']}")
+                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['hostname']},{j[k]['script_output']}")
 
            elif tool_name == 'nuclei':
                if oformat == 'tab':
