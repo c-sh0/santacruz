@@ -40,7 +40,7 @@ The easiest approach when settings passwords is by following the steps below oth
 Quick Start Examples
 
 ## Nmap
-Nmap doesn't support output in json format (Shame!). The log will need to be converted before being sent to Elasticsearch. Run nmap with the `-oX` to save the ouput in XML format and then Import scan data into Elasticsearch using `nmap2es.py` *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
+Nmap doesn't support output in json format (Shame!). The log will need to be converted before being sent to Elasticsearch. Run nmap with the `-oX` to save the ouput in XML format and then Import scan data into Elasticsearch using `nmap2es.py` *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
    ```sh
       nmap --open -oX data/nmap/nmap_scan.xml <target>
       nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
@@ -60,7 +60,7 @@ Nuclei has native support for Elasticsearch
    ```
 
 ## Viewing data
-Since the data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output for use with other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="scripts/README.md" target="_blank">scripts/README.md</a> for more information*
+Since the data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output for use with other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
 
 ## Todo
    * Logstash? (I see no need for it, yet?)
