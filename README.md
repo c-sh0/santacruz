@@ -19,7 +19,7 @@ Having to write custom shell scripts to parse and keep track of all the data fro
    ```chown 1000:1000 ./data/elasticsearch ./data/kibana```
 
 ## Start Elasticsearch and Kibana containers
-The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later. https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html  
+The easiest approach when settings passwords is by following the steps below otherwise, your going to end up mucking with the containers and/or composer files later.
 1. Start Elasticsearch container (&& watch logs to make sure it starts)<br>
    ```docker-compose up -d elasticsearch && docker logs elasticsearch --follow```
 
