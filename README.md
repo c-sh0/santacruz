@@ -1,5 +1,7 @@
 # Santacruz
-Elasticsearch and Kibana setup for Penetration testing and reconnaissance. An Original Idea? Nope. My own version? Yep. 
+Elasticsearch and Kibana setup for Penetration testing and reconnaissance. 
+* An Original Idea? Nope. 
+* My own version? Yep. 
 
 ## Description
 Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features i'll never use nor care about. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
@@ -67,6 +69,7 @@ Since the data now lives in Elasticsearch it can be searched, parsed, and viewed
 
 ## Todo
    * Logstash? (I see no need for it, yet?)
+   * Make satasearch.py more dynamic
    * More stuff
 
 ## References
