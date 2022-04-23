@@ -1,3 +1,11 @@
+# httpx.nse
+This script will run httpx on any open tcp ports discovered during an nmap scan. Why this script? Because it was easier to implement.<br>
+see: ```https://github.com/nmap/nmap/issues/2395```
+
+<h3 align="left">
+  <img src="nmap-httpx-scan.png" alt="nmap-httpx-scan.png" width="1024px"></a>
+</h3>
+
 # Scripts
 Helper scripts
 
@@ -17,6 +25,9 @@ optional arguments:
 -i, --index  [index]   :- Elasticsearch index (default: nmap)
 -v, --verbose          :- Verbose output
 ```
+<h3 align="left">
+  <img src="nmap2es.png" alt="nmap2es.png"></a>
+</h3>
 
 ## santasearch.py
 A simple script to retrieve tool output data from Elasticsearch. Useful for reporting and/or parsing the output for use with other tools. This script reads a configuration file  for elasticsearch as well as any nessesary json queries for stored tool data. See: `conf/santacruz.yml`
@@ -35,6 +46,12 @@ optional arguments:
                                    [YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)
   -v, --verbose                 :- Verbose output
 ```
+<h3 align="left">
+  <img src="santasearch.png" alt="santasearch.png"></a>
+</h3>
+<h3 align="left">
+  <img src="santasearch-httpx.png" alt="santasearch-httpx.png"></a>
+</h3>
 Example [datetime] filter formats
 
 |From Start (-s) |To End (-e) | Display|
@@ -51,3 +68,8 @@ Example [datetime] filter formats
 |now-1y    | now-15d |  Last 1 year minus 15 days|
 |2022/10/03 | 2022/10/08| Oct 03 2022 <-> Oct 08 2022|
 |2022/10/17 03:01:22| 2022/11/20 10:02:33| Oct 17 03:01:22 <-> Nov 20 2022 10:02:33|  
+
+</h3>
+<h3 align="left">
+  <img src="nuclei.png" alt="nuclei.png"></a>
+</h3>
