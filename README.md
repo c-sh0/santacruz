@@ -37,7 +37,7 @@ The easiest approach when settings passwords is by following the steps below oth
 6. (Optional) Add additional users: **Stack Management** -> **Users**
 
 ## Sending data to Elasticsearch
-Quick Start Examples
+Quick Start
 
 ## Nmap
 Nmap doesn't support output in json format (Shame!). The log will need to be converted before being sent to Elasticsearch. Run nmap with the `-oX` to save the ouput in XML format and then Import scan data into Elasticsearch using `nmap2es.py` *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
@@ -61,6 +61,9 @@ Nuclei has native support for Elasticsearch
 
 ## Viewing data
 Since the data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output for use with other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
+
+## Documentation
+<a href="doc/README.md" target="_blank">doc/README.md</a>
 
 ## Todo
    * Logstash? (I see no need for it, yet?)
