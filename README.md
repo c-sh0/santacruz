@@ -38,6 +38,14 @@ The easiest approach when setting passwords is by following the steps below othe
 
 6. (Optional) Add additional users: **Stack Management** -> **Users**
 
+### Optional
+By default, containers will not automaticaly start on system boot. The following commands will start the containers when docker starts
+   ```sh
+      docker update --restart=always elasticsearch
+      docker update --restart=always kibana
+   ```
+See: https://docs.docker.com/config/containers/start-containers-automatically/
+
 ## Sending data to Elasticsearch
 Quick Start
 
