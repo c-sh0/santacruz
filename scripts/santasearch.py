@@ -95,7 +95,13 @@ def prepare_ss(opt_args):
         tool_data[tool] = yml_conf['sc_tools'][tool]
         tool_data[tool]['_esquery']['size'] = opt_args.limit
 
-        if tool == 'nmap':
+        if tool == 'discovery':
+            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": stime, "lte": etime}}}]
+
+            if opt_args.addr:
+               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"ip": opt_args.addr}}]
+
+        if tool == 'portscan':
             tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": stime, "lte": etime}}}]
 
             if opt_args.addr:
@@ -119,6 +125,9 @@ def prepare_ss(opt_args):
        for tool in yml_conf['sc_tools']:
            sc_data['search'][tool] = tool_data[tool]
 
+    #if sc_data['verbose']:
+    #   print(f"[VERBOSE]: Session data:\n{sc_data}")
+
     return sc_data
 
 def print_ESdata(tool_name,data,oformat):
@@ -129,7 +138,13 @@ def print_ESdata(tool_name,data,oformat):
 
     for j in data:
        for k in j:
-           if tool_name == 'nmap':
+           if tool_name == 'discovery':
+               if oformat == 'tab':
+                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['state']}\t{j[k]['asn']}\t{j[k]['asn_handle']}\t{j[k]['asn_prefix']}\t{j[k]['asn_name']}\t{j[k]['asn_cc']}")
+               elif oformat == 'csv':
+                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['state']},{j[k]['asn']},{j[k]['asn_handle']},{j[k]['asn_prefix']},{j[k]['asn_name']},{j[k]['asn_cc']}")
+
+           if tool_name == 'portscan':
                if oformat == 'tab':
                   print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['hostname']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
                elif oformat == 'csv':
@@ -148,8 +163,12 @@ def print_ESdata(tool_name,data,oformat):
                   print(f"{j[k]['@timestamp']},{j[k]['event']['ip']},{j[k]['event']['matched-at']},{j[k]['event']['template-id']},{j[k]['event']['info']['severity']},{j[k]['event']['info']['name']}")
     return 0
 
-def ESquery(es_conn,es_host,es_data):
+def ESquery(es_conn,es_host,es_data,verbose):
     es_uri = es_host + '/' + es_data['_esindex'] + '/_search?filter_path=hits.hits._source'
+
+    if verbose:
+       print(f"[VERBOSE]: URI, {es_uri}")
+       print(f"[VERBOSE]: Query:\n{es_data['_esquery']}")
 
     r = es_conn.post(es_uri, data=json.dumps(es_data['_esquery']), verify=False)
     if r.status_code != 200:
@@ -203,7 +222,7 @@ def main():
     es_session = init_ESsession(ss_data['es_user'],ss_data['es_pass'],ss_data['es_host'],ss_data['verbose'])
 
     for tool in ss_data['search']:
-        results = ESquery(es_session,ss_data['es_host'],ss_data['search'][tool])
+        results = ESquery(es_session,ss_data['es_host'],ss_data['search'][tool],ss_data['verbose'])
 
         if len(results):
             print_ESdata(tool,results,ss_data['oformat'])
