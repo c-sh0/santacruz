@@ -25,8 +25,22 @@ elasticsearch:
 # Tools and ES json queries #
 #- -------------------------#
 sc_tools: {
-   nmap: {
-     "_esindex": "nmap",
+   discovery: {
+     "_esindex": "nmap_discovery",
+     "_esquery": {
+         "query": {
+           "bool": {
+             "must": [],
+           }
+         },
+         "_source": {"includes": ["time","ip","state","asn","asn_handle","asn_prefix","asn_name","asn_cc"]},
+         "size": 100,
+         "sort": [{"time": "asc" }]
+       }
+   },
+
+   portscan: {
+     "_esindex": "nmap_portscan",
      "_esquery": {
          "query": {
            "bool": {
@@ -40,7 +54,7 @@ sc_tools: {
    },
 
    httpx: {
-     "_esindex": "nmap",
+     "_esindex": "nmap_portscan",
      "_esquery": {
          "query": {
            "bool": {
