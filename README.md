@@ -1,13 +1,13 @@
 # Santacruz
-Elasticsearch and Kibana setup for Penetration testing and reconnaissance. 
-* An Original Idea? Nope. 
-* My own version? Yep. 
+Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
+* An Original Idea? Nope.
+* My own version? Yep.
 
 ## Description
 Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features i'll never use nor care about. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
 
 # Getting Started
-1. Clone<br> 
+1. Clone<br>
    ```git clone https://github.com/c-sh0/santacruz.git```
 
 2. Increase virtual memory for Elasticsearch<br>
@@ -25,7 +25,7 @@ The easiest approach when setting passwords is by following the steps below othe
 
 2. Change the default passwords for all built-in users, make note of the output.<br>
    ```docker exec elasticsearch /bin/bash -c "bin/elasticsearch-setup-passwords auto --batch"```
-   
+
 3. Update the Kibana and Santacruz configuration files with generated password from #2<br>
    ```conf/kibana.yml```<br>
    ```conf/santacruz.yml```
@@ -55,16 +55,16 @@ Nmap doesn't support output in json format (Shame!). The log will need to be con
       nmap --open -oX data/nmap/nmap_scan.xml <target>
       nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
    ```
-   
+
 ## Nmap + Httpx
 Httpx is a great tool for determining if a port is running http(s). Using nmap + `httpx.nse` can save you an extra step during the reconnaissance phase. The script will run httpx on any open tcp ports discovered during the scan. (`nmap2es.py` supports nmap script output)
    ```sh
       nmap --open -script=nmap_nse/httpx.nse --script-args httpx_bin=/path/to/httpx -oX data/nmap/nmap_scan.xml <target>
       nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
    ```
-   
+
 ## Nuclei
-Nuclei has native support for Elasticsearch  
+Nuclei has native support for Elasticsearch
    ```sh
       nuclei -report-config conf/santacruz.yml -u <target>
    ```
@@ -77,7 +77,7 @@ Since the data now lives in Elasticsearch it can be searched, parsed, and viewed
 
 ## Todo
    * Logstash? (I see no need for it, yet?)
-   * Make satasearch.py more dynamic
+   * Re-do Documentation
    * More stuff
 
 ## References

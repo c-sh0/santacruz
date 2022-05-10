@@ -20,168 +20,185 @@ import re
 import yaml
 from urllib.parse import urlparse
 
-def get_indexes(es_session,es_host,verbose):
-    index_URI = es_host + '/_cat/indices?h=index&format=json'
+def p_results(es_idx,data,op):
+
+    for a in data:
+        d  = json.loads(json.dumps(a['_source']))
+        ts    = re.sub("['T','Z']",' ',d['@timestamp']).strip()
+        ip    = d['event']['ip']
+        sev   = d['event']['info']['severity']
+        host  = d['event']['host']
+        iname = d['event']['info']['name']
+
+        #print(json.dumps(d))
+        if es_idx == 'nmap_portscan':
+                port      = d['event']['port']
+                hname     = d['event']['hostname']
+                proto     = d['event']['protocol']
+                state     = d['event']['state']
+                script    = d['event']['script']
+                script_op = d['event']['script_output'].replace('[]','').lstrip()
+
+                if op =='csv':
+                   print(f"{es_idx},{ts},{ip},{hname},{port},{state},{proto},{script},{script_op}")
+                else:
+                   print(f"{es_idx}: {ts}\t{ip}\t{hname}\t{port}\t{state}\t{proto}\t{script}\t{script_op}")
+
+        elif es_idx == 'nmap_discovery':
+                h_state   = d['event']['state']
+                asn       = d['event']['asn']
+                as_cc     = d['event']['asn_cc']
+                as_handle = d['event']['asn_handle']
+                as_name   = d['event']['asn_name'].replace(',','').lstrip()
+                as_prefix = d['event']['asn_prefix']
+                as_source = d['event']['asn_source']
+
+                if op =='csv':
+                   print(f"{es_idx},{ts},{ip},{h_state},{as_prefix},{asn},{as_handle},{as_name},{as_cc},{as_source}")
+                else:
+                   print(f"{es_idx}: {ts}\t{ip}\t{h_state}\t{as_prefix}\t{asn}\t{as_handle}\t{as_name}\t{as_cc}\t{as_source}")
+
+        elif es_idx == 'nuclei':
+                match_at = d['event']['matched-at']
+                tid = d['event']['template-id']
+
+                m_name = ''
+                if 'matcher-name' in d['event']:
+                    m_name = d['event']['matcher-name']
+
+                if op =='csv':
+                   print(f"{es_idx},{ts},{ip},{match_at},{tid},{sev}")
+                else:
+                   print(f"{es_idx}: {ts}\t{ip}\t\t{match_at}\t{tid}\t{sev}")
+        else:
+                print(f"[ERROR]: Unknown index, ({es_idx})")
+                return sys.exit(-255)
+
+    print(f"\n")
+    return 1
+
+def do_Search(ctx):
+    for idx in ctx['es_indices']:
+        idx_uri = ctx['es_host'] + '/' + idx + '/_search?filter_path=hits.hits._source'
+        #print(idx_uri)
+
+        try:
+            r = ctx['es_session'].post(idx_uri, data=json.dumps(ctx['es_query']), verify=False)
+            if r.status_code != 200:
+               print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
+               return sys.exit(-255)
+
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
+
+        if len(r.json()):
+           data = r.json()['hits']['hits']
+           if ctx['oformat'] == 'json':
+              print(json.dumps(data))
+           else:
+              p_results(idx,data,ctx['oformat'])
+
+    return 1
+
+def bld_ESquery(ctx):
+    es_query = {
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                           {"range": {"@timestamp": {"gte": ctx['stime'], "lte": ctx['etime']}}}
+                    ]
+                }
+            },
+            "_source": {
+                 "includes": [
+                       "@timestamp",
+                       "event.ip",
+                       "event.hostname",
+                       "event.host",
+                       "event.port",
+                       "event.protocol",
+                       "event.state",
+                       "event.script",
+                       "event.script_output",
+                       "event.info.severity",
+                       "event.info.name",
+                       "event.matched-at",
+                       "event.matcher-name",
+                       "event.template-id",
+                       "event.asn",
+                       "event.asn_cc",
+                       "event.asn_handle",
+                       "event.asn_name",
+                       "event.asn_prefix",
+                       "event.asn_source",
+                       "event.info.classification.cvss-score"
+                 ]
+            },
+            "size": ctx['lsize'],
+            "sort": [{"@timestamp": "asc"}]
+    }
+
+    if ctx['ip_addr']:
+       es_query['query']['bool']['must'] = [{"match": {"event.ip": ctx['ip_addr']}}]
+
+    if ctx['verbose']:
+       print(f"[VERBOSE]: Elasticsearch Query:  {json.dumps(es_query)}")
+
+    #print(json.dumps(es_query))
+    return es_query
+
+def get_indexes(ctx,do_list):
+    index_URI = ctx['es_host'] + '/_cat/indices?h=index&format=json'
     index_arr = []
 
-    r = es_session.get(index_URI, verify=False)
+    if ctx['verbose']:
+       print(f"[VERBOSE]: Get Elasticsearch indices: {index_URI}")
+
+    r = ctx['es_session'].get(index_URI, verify=False)
     if r.status_code != 200:
        print(f"[ERROR]: Connection failed, got {r.status_code} response!")
-       return sys.exit(-1)
+       return sys.exit(-255)
 
     idx_json = json.loads(r.text)
+    if do_list:
+       print(f"\nElasticsearch Index List\n----------------------------")
+
     for idx in idx_json:
         if not idx['index'].startswith('.'):
            index_arr.append(idx['index'])
+           if do_list:
+              print(f"-: {idx['index']}")
 
     return index_arr
 
-def init_ESsession(user,passwd,api_URL,verbose):
-    if verbose:
-       print(f"[INFO]: Connecting to Elasticsearch: {api_URL}")
+def init_ESsession(ctx):
+    if ctx['verbose']:
+       print(f"[VERBOSE]: Connecting to Elasticsearch: {ctx['es_host']}")
 
     session = requests.Session()
     ctype_header = {"Content-Type": "application/json"}
     session.headers.update(ctype_header)
 
-    if user:
-        userpass = user + ':' + passwd
+    if ctx['es_user']:
+        userpass = ctx['es_user'] + ':' + ctx['es_pass']
         encoded_u = base64.b64encode(userpass.encode()).decode()
         auth_header = {"Authorization" : "Basic %s" % encoded_u}
         session.headers.update(auth_header)
 
     # ES connection
-    r = session.get(api_URL, headers=session.headers, verify=False)
-    if r.status_code != 200:
-       print(f"[ERROR]: Connection failed, got {r.status_code} response!")
-       return sys.exit(-1)
+    try:
+        r = session.get(ctx['es_host'], headers=session.headers, verify=False)
+        if r.status_code != 200:
+           print(f"[ERROR]: Connection failed, got {r.status_code} response!")
+           return sys.exit(-255)
+
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
 
     return session
 
-def prepare_ss(opt_args):
-    sc_data = {}
-    tool_data = {}
-    sc_data['verbose'] = opt_args.verbose
-    sc_data['oformat'] = opt_args.output
-
-    output_formats = ['tab','csv','json']
-    if sc_data['oformat'] not in output_formats:
-       print(f"[ERROR]: Unknown output format: \"{opt_args.output}\"")
-       return sys.exit(-1)
-
-    # convert date/time to epoch or default
-    stime = chk_timef(opt_args.start)
-    etime = chk_timef(opt_args.end)
-
-    # read config
-    yml_conf = yaml.safe_load(opt_args.config)
-
-    if yml_conf['elasticsearch']['ssl']:
-       sc_data['es_host'] = 'https://' + yml_conf['elasticsearch']['ip']
-    else:
-       sc_data['es_host'] = 'http://' + yml_conf['elasticsearch']['ip']
-
-    sc_data['es_host'] += ':' + str(yml_conf['elasticsearch']['port'])
-    sc_data['es_user']  = yml_conf['elasticsearch']['username']
-    sc_data['es_pass']  = yml_conf['elasticsearch']['password']
-
-    if opt_args.tool != 'all':
-       if opt_args.tool not in yml_conf['sc_tools']:
-          print(f"[ERROR]: Unknown tool: \"{opt_args.tool}\".")
-          return sys.exit(-1)
-
-    sc_data['search'] = {}
-    for tool in yml_conf['sc_tools']:
-        tool_data[tool] = yml_conf['sc_tools'][tool]
-        tool_data[tool]['_esquery']['size'] = opt_args.limit
-
-        if tool == 'discovery':
-            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": stime, "lte": etime}}}]
-
-            if opt_args.addr:
-               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"ip": opt_args.addr}}]
-
-        if tool == 'portscan':
-            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"time": {"gte": stime, "lte": etime}}}]
-
-            if opt_args.addr:
-               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"ip": opt_args.addr}}]
-
-        elif tool == 'httpx':
-            tool_data[tool]['_esquery']['query']['bool']['filter'].append({"range": {"time": {"gte": stime, "lte": etime}}})
-
-            if opt_args.addr:
-               tool_data[tool]['_esquery']['query']['bool']['must'].append({"match": {"ip": opt_args.addr}})
-
-        elif tool == 'nuclei':
-            tool_data[tool]['_esquery']['query']['bool']['filter'] = [{"range": {"@timestamp": {"gte": stime, "lte": etime}}}]
-
-            if opt_args.addr:
-               tool_data[tool]['_esquery']['query']['bool']['must'] = [{"match": {"event.ip": opt_args.addr}}]
-
-    if opt_args.tool != 'all':
-       sc_data['search'][opt_args.tool] = tool_data[opt_args.tool]
-    else:
-       for tool in yml_conf['sc_tools']:
-           sc_data['search'][tool] = tool_data[tool]
-
-    #if sc_data['verbose']:
-    #   print(f"[VERBOSE]: Session data:\n{sc_data}")
-
-    return sc_data
-
-def print_ESdata(tool_name,data,oformat):
-
-    if oformat == 'json':
-       print(json.dumps(data))
-       return 1
-
-    for j in data:
-       for k in j:
-           if tool_name == 'discovery':
-               if oformat == 'tab':
-                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['state']}\t{j[k]['asn']}\t{j[k]['asn_handle']}\t{j[k]['asn_prefix']}\t{j[k]['asn_name']}\t{j[k]['asn_cc']}")
-               elif oformat == 'csv':
-                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['state']},{j[k]['asn']},{j[k]['asn_handle']},{j[k]['asn_prefix']},{j[k]['asn_name']},{j[k]['asn_cc']}")
-
-           if tool_name == 'portscan':
-               if oformat == 'tab':
-                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['hostname']}\t{j[k]['port']}\t{j[k]['protocol']}\t{j[k]['script']}\t{j[k]['script_output']}")
-               elif oformat == 'csv':
-                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['hostname']},{j[k]['port']},{j[k]['protocol']},{j[k]['script']},{j[k]['script_output']}")
-
-           elif tool_name == 'httpx':
-               if oformat == 'tab':
-                  print(f"{j[k]['time']}\t{j[k]['ip']}\t{j[k]['hostname']}\t{j[k]['script_output']}")
-               elif oformat == 'csv':
-                  print(f"{j[k]['time']},{j[k]['ip']},{j[k]['hostname']},{j[k]['script_output']}")
-
-           elif tool_name == 'nuclei':
-               if oformat == 'tab':
-                  print(f"{j[k]['@timestamp']}\t{j[k]['event']['ip']}\t{j[k]['event']['matched-at']}\t{j[k]['event']['template-id']}\t{j[k]['event']['info']['severity']}\t{j[k]['event']['info']['name']}")
-               elif oformat == 'csv':
-                  print(f"{j[k]['@timestamp']},{j[k]['event']['ip']},{j[k]['event']['matched-at']},{j[k]['event']['template-id']},{j[k]['event']['info']['severity']},{j[k]['event']['info']['name']}")
-    return 0
-
-def ESquery(es_conn,es_host,es_data,verbose):
-    es_uri = es_host + '/' + es_data['_esindex'] + '/_search?filter_path=hits.hits._source'
-
-    if verbose:
-       print(f"[VERBOSE]: URI, {es_uri}")
-       print(f"[VERBOSE]: Query:\n{es_data['_esquery']}")
-
-    r = es_conn.post(es_uri, data=json.dumps(es_data['_esquery']), verify=False)
-    if r.status_code != 200:
-       print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
-       return sys.exit(-1)
-
-    if not len(r.json()):
-       return {}
-
-    data = r.json()['hits']['hits']
-    return data
-
-# check and/or convert to epoch
+# Check/convert time to epoch
 def chk_timef(st):
     t = False
     os.environ['TZ'] = 'UTC'
@@ -199,33 +216,59 @@ def chk_timef(st):
        return st
     else:
        print(f"[ERROR]: Invalid end datetime format \"{st}\" [YYYY/MM/DD HH:MM:SS || now|now-N(d|w|m|h|y)]")
-       return sys.exit(-1)
+       return sys.exit(-255)
 
     return t
 
 def main():
-    parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View doc/README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
     parser.add_argument('-a','--addr',  help='[ip_addr]\t:- Search for IP address', dest='addr', metavar='', action='store')
-    parser.add_argument('-l','--limit', help='[num]\t\t:- Limit number of results (default: 100)', default=100, dest='limit', metavar='', action='store', type=int)
-    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='', action='store')
-    parser.add_argument('-t','--tool', help='[name]\t:- Search for data based on tool name (default: all)', default="all", dest='tool', metavar='', action='store')
+    parser.add_argument('-i','--index', help='[index name]\t:- Get data from index name (default: all)', default="all", dest='index', metavar='', action='store')
     parser.add_argument('-s','--start', help='[datetime]\t:- Search from start datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='', action='store')
     parser.add_argument('-e','--end', help='[datetime]\t:- Search to end datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)', default="now", dest='end', metavar='', action='store')
+    parser.add_argument('-n','--num', help='[num]\t\t:- Limit number of results (default: 100)', default=100, dest='num', metavar='', action='store', type=int)
+    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='', action='store')
+    parser.add_argument('-l','--list', help='[list]\t:- List Elasticsearch Indices', action='store_true')
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action="store_true")
-    opt_args = parser.parse_args()
+    cmdargs = parser.parse_args()
 
-    # parse main configuration file and options
-    ss_data  = prepare_ss(opt_args)
+    # Read config, build ctx
+    ctx = {}
+    ctx['verbose'] = cmdargs.verbose
+    ctx['oformat'] = cmdargs.output
+    ctx['stime']   = chk_timef(cmdargs.start)
+    ctx['etime']   = chk_timef(cmdargs.end)
+    ctx['lsize']   = cmdargs.num
+    ctx['ip_addr'] = cmdargs.addr
+    ctx['es_indices'] = [cmdargs.index]
+
+    yml_conf = yaml.safe_load(cmdargs.config)
+    if yml_conf['elasticsearch']['ssl']:
+       ctx['es_host'] = 'https://' + yml_conf['elasticsearch']['ip']
+    else:
+       ctx['es_host'] = 'http://' + yml_conf['elasticsearch']['ip']
+
+    ctx['es_host'] += ':' + str(yml_conf['elasticsearch']['port'])
+    ctx['es_user']  = yml_conf['elasticsearch']['username']
+    ctx['es_pass']  = yml_conf['elasticsearch']['password']
+    #print(ctx)
 
     # ES Session
-    es_session = init_ESsession(ss_data['es_user'],ss_data['es_pass'],ss_data['es_host'],ss_data['verbose'])
+    ctx['es_session'] = init_ESsession(ctx)
 
-    for tool in ss_data['search']:
-        results = ESquery(es_session,ss_data['es_host'],ss_data['search'][tool],ss_data['verbose'])
+    if cmdargs.index == 'all':
+       ctx['es_indices'] = get_indexes(ctx,cmdargs.list)
+    else:
+       ctx['es_indices'] = [cmdargs.index]
 
-        if len(results):
-            print_ESdata(tool,results,ss_data['oformat'])
+    # List indices, exit
+    if cmdargs.list:
+       print(f"\n")
+       sys.exit(1)
+
+    ctx['es_query'] = bld_ESquery(ctx)
+    do_Search(ctx)
 
 if __name__ == "__main__":
         main()

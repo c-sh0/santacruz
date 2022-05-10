@@ -28,40 +28,52 @@ from urllib.parse import urlparse
 #logging.basicConfig(filename='nmap2es.log', level=logging.DEBUG)
 ###
 # ================================================================================================================
-# * Send ip, hostname, script output, and open port info to ES
-# * Service detection information is not sent. (let's be honest, it's not useful and often unreliable by default)
-#
 # Original version of the parser can be found here:
-# https://raw.githubusercontent.com/ChrisRimondi/VulntoES/master/VulntoES.py
-# alt veriosn: https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
+#    https://raw.githubusercontent.com/ChrisRimondi/VulntoES/master/VulntoES.py
+# Alt Version:
+#    https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
+# Note:
+# Service detection information is not sent. (let's be honest, it's not useful and often unreliable by default)
 #
 # ================================================================================================================
+def set_dict(name,sev,tags):
+    d = {}
+    d['event'] = {}
+    d['event']['info']  = {}
+    d['event']['meta']  = {}
+    d['event']['info']['name'] = name
+    d['event']['info']['tags'] = tags
+    d['event']['info']['severity'] = sev
+
+    return d
+
 def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
     # Get time from runstats
     for r in xml_root.iter('runstats'):
         for stats in r.getchildren():
             if stats.tag == 'finished':
-               scan_time = time.strftime('%Y/%m/%d %H:%M:%S', time.gmtime(float(stats.attrib['time'])))
+               scan_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(stats.attrib['time'])))
 
     for h in xml_root.iter('host'):
-       dict_item = {}
-       dict_item['time'] = scan_time
-       dict_item['scanner'] = 'nmap'
+       es_data = set_dict('Nmap Discovery Scan','info',['nmap','discovery','network'])
+       es_data['@timestamp'] = scan_time
 
        if h.tag == 'host':
           for host in h.getchildren():
 
               if host.tag == 'address':
                  if host.attrib['addr']:
-                    dict_item['ip'] = host.attrib['addr']
+                    es_data['event']['ip'] = host.attrib['addr']
+                    es_data['event']['host'] = host.attrib['addr']
+                    es_data['event']['meta']['hostname'] = ''
 
               elif host.tag == 'status':
-                 dict_item['state'] = host.attrib['state']
+                   es_data['event']['state'] = host.attrib['state']
 
        # Only send document to ES if the host is up
-       if dict_item['state'] == 'up':
-          as_data = asLookup(dict_item['ip'])
-          es_data = merge_two_dicts(dict_item, as_data)
+       if es_data['event']['state'] == 'up':
+          as_data = asLookup(es_data['event']['ip'])
+          es_data['event'] = merge_two_dicts(es_data['event'], as_data)
 
           # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
           # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
@@ -81,64 +93,70 @@ def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
              print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
 
           #print(es_data)
+          #sys.exit()
 
 def port_ScanToEs(xml_root,ES_session,api_url,verbose):
     for h in xml_root.iter('host'):
-       dict_item = {}
-       dict_item['scanner'] = 'nmap'
+       es_data = set_dict('Nmap Port Scan','info',['nmap','portscan','network'])
 
        if h.tag == 'host':
            if 'endtime' in h.attrib and h.attrib['endtime']:
-               dict_item['time'] = time.strftime('%Y/%m/%d %H:%M:%S', time.gmtime(float(h.attrib['endtime'])))
+               es_data['@timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(h.attrib['endtime'])))
 
        for c in h:
            if c.tag == 'address':
               if c.attrib['addr']:
-                 dict_item['ip'] = c.attrib['addr']
+                 es_data['event']['ip'] = c.attrib['addr']
+                 es_data['event']['host'] = c.attrib['addr']
 
            elif c.tag == 'hostnames':
                for names in c.getchildren():
                    if names.attrib['name']:
-                       dict_item['hostname'] = names.attrib['name']
+                       es_data['event']['meta']['hostname'] = names.attrib['name']
+                       es_data['event']['hostname'] = names.attrib['name']
 
            elif c.tag == 'ports':
                for port in c.getchildren():
                    if port.tag == 'port':
-                       dict_item['port'] = port.attrib['portid']
-                       dict_item['protocol'] = port.attrib['protocol']
-                       dict_item['script'] = ''
-                       dict_item['script_output'] = ''
+                       es_data['event']['port'] = port.attrib['portid']
+                       es_data['event']['protocol'] = port.attrib['protocol']
+                       es_data['event']['script'] = ''
+                       es_data['event']['script_output'] = ''
 
                        for p in port.getchildren():
                            if p.tag == 'state':
-                               dict_item['state'] = p.attrib['state']
+                               es_data['event']['state'] = p.attrib['state']
 
                            elif p.tag == 'script':
                                if p.attrib['id']:
                                   if p.attrib['output']:
-                                     dict_item['script'] = p.attrib['id']
-                                     s  = p.attrib['output'].replace('\n','')
-                                     dict_item['script_output'] = re.sub('\\\\x00', '', s)
+                                     es_data['event']['script'] = p.attrib['id']
 
-                       if dict_item['state'] == 'open':
+                                     s  = p.attrib['output'].replace('\n','')
+                                     es_data['event']['script_output'] = re.sub('\\\\x00', '', s)
+
+                       if es_data['event']['state'] == 'open':
                           ## fill in some empty values
-                          if not 'hostname' in dict_item:
-                             dict_item['hostname'] = "unknwon"
+                          if not 'hostname' in es_data['event']:
+                             es_data['event']['hostname'] = "unknwon"
+
+                          if not 'hostname' in es_data['event']['meta']:
+                             es_data['event']['meta']['hostname'] = "unknwon"
 
                           # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
                           # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
                           # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
-                          index_uuid = uuid_from_string(json.dumps(dict_item))
+                          index_uuid = uuid_from_string(json.dumps(es_data))
                           document_url = api_url + "/" + index_uuid + "?op_type=create"
                           print(f"[INFO]: ES create: {document_url}")
 
                           if verbose:
-                             print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(dict_item)}")
+                             print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(es_data)}")
 
                           # Only send document to ES if the port is open
-                          r = ES_session.put(document_url, data=json.dumps(dict_item), verify=False)
+                          r = ES_session.put(document_url, data=json.dumps(es_data), verify=False)
                           if r.status_code == 409:
-                             print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m\n{json.dumps(dict_item)}")
+                             print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m\n{json.dumps(es_data)}")
 
                           if verbose:
                              print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
@@ -157,33 +175,34 @@ def uuid_from_string(string):
 
 def asLookup(ip_addr):
     # Defaults
-    data = {}
-    data['asn_cc']      = ''
-    data['asn']         = ''
-    data['asn_prefix']  = ''
-    data['asn_handle']  = ''
-    data['asn_name']    = ''
-    data['asn_source']  = ''
+    d = {}
+    d['asn_cc']      = ''
+    d['asn']         = ''
+    d['asn_prefix']  = ''
+    d['asn_handle']  = ''
+    d['asn_name']    = ''
+    d['asn_source']  = ''
 
     services = ['cymru','shadowserver']
     for svc in services:
         try:
            obj = get_as_data(ip_addr, svc)
 
-           data['asn_cc']      = obj.cc
-           data['asn']         = obj.asn
-           data['asn_prefix']  = obj.prefix
-           data['asn_handle']  = obj.handle
-           data['asn_name']    = re.sub('[,]', '', obj.as_name)
-           data['asn_source']  = obj.data_source
+           d['asn_cc']      = obj.cc
+           d['asn']         = obj.asn
+           d['asn_prefix']  = obj.prefix
+           d['asn_handle']  = obj.handle
+           d['asn_name']    = re.sub('[,]', '', obj.as_name)
+           d['asn_source']  = obj.data_source
 
-           return data
+           return d
 
         except LookupError as e:
            #print('%-15s  %s' % (addr, e))
            continue
 
-    return data
+    return d
+
 def init_ESSession(user,passwd,api_URL,verbose):
     print(f"[INFO]: Connecting to Elasticsearch: {api_URL}")
 
@@ -211,11 +230,12 @@ def init_ESSession(user,passwd,api_URL,verbose):
 def main():
     parser = argparse.ArgumentParser(description='Import nmap XML output into Elasticsearch')
     parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-f','--file', help='[file]\t:- Path to nmap XML input file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-t','--type', help='[scan type]\t:- nmap scan type [portscan|discovery]', dest='type', metavar='', required=True)
-    parser.add_argument('-i','--index', help='[name]\t:- Elasticsearch index (default: nmap_portscan)', dest='index', default='nmap_portscan', metavar='', action='store')
+    parser.add_argument('-f','--file', help='[file]\t:- Path to Nmap XML report file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-t','--type', help='[report type]\t:- Nmap report type [portscan|discovery]', dest='type', metavar='', required=True)
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action='store_true')
+
     opt_args = parser.parse_args()
+    scan_type = opt_args.type.strip()
 
     conf = yaml.safe_load(opt_args.config)
     if conf['elasticsearch']['ssl']:
@@ -231,19 +251,16 @@ def main():
     xml_root = xml_tree.getroot()
     opt_args.file.close()
 
-    if opt_args.index:
-       es_index = opt_args.index.lower()
-
     # Build index URL
-    index_URL = es_host + '/' + es_index + '/_doc'
+    index_URL = es_host + '/nmap_' + scan_type + '/_doc'
 
     # ES Session
     es_session = init_ESSession(es_user,es_pass,es_host,opt_args.verbose)
 
-    if opt_args.type == 'portscan':
+    if scan_type == 'portscan':
        port_ScanToEs(xml_root,es_session,index_URL,opt_args.verbose)
 
-    elif opt_args.type == 'discovery':
+    elif scan_type == 'discovery':
        discovery_ScanToEs(xml_root,es_session,index_URL,opt_args.verbose)
 
     else:
