@@ -2,3 +2,4 @@ cluster.name: "docker-cluster"
 network.host: 127.0.0.1
 discovery.type: single-node
 xpack.security.enabled: true
+action.destructive_requires_name: true
