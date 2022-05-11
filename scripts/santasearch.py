@@ -20,7 +20,7 @@ import re
 import yaml
 from urllib.parse import urlparse
 
-def p_results(es_idx,data,op):
+def p_results(es_idx,data,out):
 
     for a in data:
         d  = json.loads(json.dumps(a['_source']))
@@ -39,8 +39,13 @@ def p_results(es_idx,data,op):
                 script    = d['event']['script']
                 script_op = d['event']['script_output']
 
-                if op =='csv':
+                if out =='csv':
                    print(f"{es_idx},{ts},{ip},{hname},{port},{state},{proto},{script},{script_op}")
+
+                elif out == 'httpx':
+                   so_tmp = script_op.split()
+                   print(f"{so_tmp[0]}")
+
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t{hname}\t{port}\t{state}\t{proto}\t{script}\t{script_op}")
 
@@ -53,8 +58,9 @@ def p_results(es_idx,data,op):
                 as_prefix = d['event']['asn_prefix']
                 as_source = d['event']['asn_source']
 
-                if op =='csv':
+                if out =='csv':
                    print(f"{es_idx},{ts},{ip},{h_state},{as_prefix},{asn},{as_handle},{as_name},{as_cc},{as_source}")
+
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t{h_state}\t{as_prefix}\t{asn}\t{as_handle}\t{as_name}\t{as_cc}\t{as_source}")
 
@@ -66,15 +72,18 @@ def p_results(es_idx,data,op):
                 if 'matcher-name' in d['event']:
                     m_name = d['event']['matcher-name']
 
-                if op =='csv':
+                if out =='csv':
                    print(f"{es_idx},{ts},{ip},{match_at},{tid},{sev}")
+
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t\t{match_at}\t{tid}\t{sev}")
         else:
                 print(f"[ERROR]: Unknown index, ({es_idx})")
                 return sys.exit(-255)
 
-    print(f"\n")
+    if not out == 'httpx':
+       print(f"\n")
+
     return 1
 
 def do_Search(ctx):
@@ -141,6 +150,10 @@ def bld_ESquery(ctx):
 
     if ctx['ip_addr']:
        es_query['query']['bool']['must'] = [{"match": {"event.ip": ctx['ip_addr']}}]
+
+    if ctx['oformat'] == 'httpx':
+       es_query['query']['bool']['must'].append({"match": {"event.script": "httpx"}})
+       es_query['query']['bool']['filter'].append({"exists": {"field": "event.script_output"}})
 
     if ctx['verbose']:
        print(f"[VERBOSE]: Elasticsearch Query:  {json.dumps(es_query)}")
@@ -228,7 +241,7 @@ def main():
     parser.add_argument('-s','--start', help='[datetime]\t:- Search from start datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='', action='store')
     parser.add_argument('-e','--end', help='[datetime]\t:- Search to end datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)', default="now", dest='end', metavar='', action='store')
     parser.add_argument('-n','--num', help='[num]\t\t:- Limit number of results (default: 100)', default=100, dest='num', metavar='', action='store', type=int)
-    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='', action='store')
+    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json,httpx] (default: tab)', default="tab", dest='output', metavar='', action='store')
     parser.add_argument('-l','--list', help='[list]\t:- List Elasticsearch Indices', action='store_true')
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action="store_true")
     cmdargs = parser.parse_args()
