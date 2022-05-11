@@ -37,7 +37,7 @@ def p_results(es_idx,data,op):
                 proto     = d['event']['protocol']
                 state     = d['event']['state']
                 script    = d['event']['script']
-                script_op = d['event']['script_output'].replace('[]','').lstrip()
+                script_op = d['event']['script_output']
 
                 if op =='csv':
                    print(f"{es_idx},{ts},{ip},{hname},{port},{state},{proto},{script},{script_op}")
@@ -49,7 +49,7 @@ def p_results(es_idx,data,op):
                 asn       = d['event']['asn']
                 as_cc     = d['event']['asn_cc']
                 as_handle = d['event']['asn_handle']
-                as_name   = d['event']['asn_name'].replace(',','').lstrip()
+                as_name   = d['event']['asn_name']
                 as_prefix = d['event']['asn_prefix']
                 as_source = d['event']['asn_source']
 

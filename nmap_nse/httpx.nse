@@ -49,7 +49,7 @@ action = function(host, port)
 	handle:close()
 
         -- Remove empty "[]" responses
-        result = result:gsub("%[%]", "")
+        -- result = result:gsub("%[%]", "")
 
 	if(result == nil or result == '') then
 		return nil

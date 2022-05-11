@@ -47,6 +47,28 @@ def set_dict(name,sev,tags):
 
     return d
 
+def send2ES(es_session,es_url,data,verbose):
+    # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
+    # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
+    index_uuid = uuid_from_string(json.dumps(data))
+    document_url = es_url + "/" + index_uuid + "?op_type=create"
+    print(f"[INFO]: ES create: {document_url}")
+
+    if verbose:
+       print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(data)}")
+
+    r = es_session.put(document_url, data=json.dumps(data), verify=False)
+    if r.status_code == 409:
+       print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m\n{json.dumps(data)}")
+
+    if verbose:
+       print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
+
+    #print(json.dumps(data))
+    #print(index_uuid)
+    return 1
+
 def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
     # Get time from runstats
     for r in xml_root.iter('runstats'):
@@ -75,23 +97,7 @@ def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
           as_data = asLookup(es_data['event']['ip'])
           es_data['event'] = merge_two_dicts(es_data['event'], as_data)
 
-          # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
-          # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
-          # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
-          index_uuid = uuid_from_string(json.dumps(es_data))
-          document_url = api_url + "/" + index_uuid + "?op_type=create"
-          print(f"[INFO]: ES create: {document_url}")
-
-          if verbose:
-             print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(es_data)}")
-
-          r = ES_session.put(document_url, data=json.dumps(es_data), verify=False)
-          if r.status_code == 409:
-             print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m\n{json.dumps(es_data)}")
-
-          if verbose:
-             print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
-
+          send2ES(ES_session,api_url,es_data,verbose)
           #print(es_data)
           #sys.exit()
 
@@ -132,8 +138,11 @@ def port_ScanToEs(xml_root,ES_session,api_url,verbose):
                                   if p.attrib['output']:
                                      es_data['event']['script'] = p.attrib['id']
 
-                                     s  = p.attrib['output'].replace('\n','')
-                                     es_data['event']['script_output'] = re.sub('\\\\x00', '', s)
+                                     # Clean up script output
+                                     s0  = p.attrib['output'].replace('\n','')
+                                     s1  = re.sub('\\\\x00', '', s0)
+                                     s2  = s1.replace('[]','').lstrip()
+                                     es_data['event']['script_output'] = re.sub(' +',' ',s2)
 
                        if es_data['event']['state'] == 'open':
                           ## fill in some empty values
@@ -143,23 +152,9 @@ def port_ScanToEs(xml_root,ES_session,api_url,verbose):
                           if not 'hostname' in es_data['event']['meta']:
                              es_data['event']['meta']['hostname'] = "unknwon"
 
-                          # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
-                          # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
-                          # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
-                          index_uuid = uuid_from_string(json.dumps(es_data))
-                          document_url = api_url + "/" + index_uuid + "?op_type=create"
-                          print(f"[INFO]: ES create: {document_url}")
-
-                          if verbose:
-                             print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(es_data)}")
-
                           # Only send document to ES if the port is open
-                          r = ES_session.put(document_url, data=json.dumps(es_data), verify=False)
-                          if r.status_code == 409:
-                             print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m\n{json.dumps(es_data)}")
+                          send2ES(ES_session,api_url,es_data,verbose)
 
-                          if verbose:
-                             print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
 
 def merge_two_dicts(x, y):
     z = x.copy()   # start with x's keys and values
@@ -192,7 +187,8 @@ def asLookup(ip_addr):
            d['asn']         = obj.asn
            d['asn_prefix']  = obj.prefix
            d['asn_handle']  = obj.handle
-           d['asn_name']    = re.sub('[,]', '', obj.as_name)
+           #d['asn_name']    = re.sub('[,]', '', obj.as_name).lstrip()
+           d['asn_name']    = obj.as_name.replace(',','').lstrip()
            d['asn_source']  = obj.data_source
 
            return d
