@@ -3,6 +3,9 @@
 # Maybe one day nmap will add support for json output?
 # Untill that happens? ¯\_(ツ)_/¯
 #
+# [/csh:]> date "+%D"
+# 05/12/22
+#
 import argparse
 import re
 import xml.etree.ElementTree as xml
