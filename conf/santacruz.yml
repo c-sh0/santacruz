@@ -1,12 +1,6 @@
 #--------------------------#
 # santacruz configuration  #
 #--------------------------------------------------#
-# Tool paths (used in scripts/do_scan.sh)
-#--------------------------------------------------#
-nmap-bin: /usr/local/bin/nmap
-httpx-bin: /usr/local/bin/httpx
-nuclei-bin: /usr/local/bin/nuclei
-#--------------------------------------------------#
 # scripts/santasearch.py
 # Elasticsearch (compatibility with nuclei)        #
 # See: issue-tracker-config.yaml                   #
