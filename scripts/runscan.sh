@@ -104,6 +104,7 @@ _nmapparse="${_scriptdir}/nmapparse.py"
 _httpxnse="${_nsedir}/httpx.nse"
 #
 _conffile="${_confdir}/santacruz.yml"
+_nucleiconf="${_confdir}/nuclei.yml"
 _dscan_xml="${_nmapdir}/dsicovery_scan-${_scandate}.xml"
 _pscan_xml="${_nmapdir}/port_scan-${_scandate}.xml"
 _pscan_targets="${_nmapdir}/port_scan-${_scandate}.targets"
@@ -138,7 +139,7 @@ pre_scan() {
 	done
 
 	# check files
-	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_conffile})
+	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_conffile} ${_nucleiconf})
 	for _file in "${chk_files[@]}"; do
 		if [ ! -f ${_file} ]; then
 			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such file, (${_file})"
@@ -252,7 +253,7 @@ run_scan() {
 
 	 ${_nuclei} -silent -no-color -disable-update-check -max-redirects 3 \
 		-report-config ${_conffile} -list ${_nuclei_targets} \
-		-templates ${_nucleitpldir} -exclude-id ${_confdir}/nuclei-templates.exclude
+		-templates ${_nucleitpldir} -config ${_nucleiconf}
 
 	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nuclei scan, Complete"
 
