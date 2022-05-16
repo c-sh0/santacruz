@@ -13,8 +13,8 @@ cat << _EOF_
 Usage: $0 [-d] [-t] -h -v
 
 Options:
--rd, --rootdir [directory]  :- Path to root directory
--t,  --targets [file]       :- Path to file containing a list of target hosts to scan (one per line)
+-r, --rundir  [directory] :- Path to run directory (data, scripts, etc...)
+-t, --targets [file]      :- Path to file containing a list of target hosts to scan (one per line)
 
 -h, --help      :- Show this help message and exit
 -v, --verbose   :- Verbose output
@@ -43,15 +43,15 @@ mkdate() {
 ######################
 # Parseargs Function #
 ######################
-_rootdir=''
+_rundir=''
 _targetsf=''
 parse_args() {
 	_nargs=0
         args=${1}
 	for arg in "$@"; do
 		case ${arg} in
-			-rd|--rootdir) shift
-				_rootdir=${1}
+			-r|--rundir) shift
+				_rundir=${1}
 				((_nargs++))
 			;;
 
@@ -76,8 +76,8 @@ parse_args() {
 
 	[ "${_nargs}" -ne 2 ] && show_help
 
-	if [ ! -d ${_rootdir} ]; then
-		echo "error: No such directory, (${_rootdir})"
+	if [ ! -d ${_rundir} ]; then
+		echo "error: No such directory, (${_rundir})"
 		exit -255
 	fi
 
@@ -92,10 +92,10 @@ parse_args "$@"
 # Globals #
 ###########
 _scandate="$(mkdate "d")"
-_datadir="${_rootdir}/data"
-_confdir="${_rootdir}/conf"
-_scriptdir="${_rootdir}/scripts"
-_nsedir="${_rootdir}/nmap_nse"
+_datadir="${_rundir}/data"
+_confdir="${_rundir}/conf"
+_scriptdir="${_rundir}/scripts"
+_nsedir="${_rundir}/nmap_nse"
 _nucleitpldir="${_datadir}/nuclei-templates"
 _nucleidir="${_datadir}/nuclei"
 _nmapdir="${_datadir}/nmap"
@@ -103,9 +103,10 @@ _nmap2es="${_scriptdir}/nmap2es.py"
 _nmapparse="${_scriptdir}/nmapparse.py"
 _httpxnse="${_nsedir}/httpx.nse"
 #
+_conffile="${_confdir}/santacruz.yml"
 _dscan_xml="${_nmapdir}/dsicovery_scan-${_scandate}.xml"
-_pscan_xml="${_nmapdir}/portscan-${_scandate}.xml"
-_pscan_targets="${_nmapdir}/portscan-${_scandate}.targets"
+_pscan_xml="${_nmapdir}/port_scan-${_scandate}.xml"
+_pscan_targets="${_nmapdir}/port_scan-${_scandate}.targets"
 _nuclei_targets="${_nucleidir}/nuclei-${_scandate}.targets"
 #
 _nmap='/usr/local/bin/nmap'
@@ -117,28 +118,39 @@ _nuclei='/usr/local/bin/nuclei'
 # Pre-scan function #
 #####################
 pre_scan() {
+	# check for nuclei templates dir, (git checkout if it does not exist)
+	if [ ! -d ${_nucleitpldir} ]; then
+		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: git clone https://github.com/projectdiscovery/nuclei-templates.git"
+		_gitcmd=`which git`
+		if [ ! -e ${_gitcmd} ]; then
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: 'git', command not found"
+			exit -255
+		fi
+		${_gitcmd} clone https://github.com/projectdiscovery/nuclei-templates.git ${_nucleitpldir}
+	fi
+
 	chk_dirs=(${_datadir} ${_confdir} ${_scriptdir} ${_nsedir} ${_nucleitpldir})
 	for _dir in "${chk_dirs[@]}"; do
 		if [ ! -d ${_dir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() Error: No such directory, (${_dir})"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_dir})"
 			exit -255
 		fi
 	done
 
 	# check files
-	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse})
+	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_conffile})
 	for _file in "${chk_files[@]}"; do
 		if [ ! -f ${_file} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() Error: No such file, (${_file})"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such file, (${_file})"
 			exit -255
 		fi
 	done
 
-	# tools
+	# check for tool installation
 	tools=(${_nmap} ${_httpx} ${_nuclei})
 	for tool in "${tools[@]}"; do
 		if [ ! -f ${tool} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() Error: No such file, (${_file})"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such file, (${_file})"
 			exit -255
 		fi
 	done
@@ -148,7 +160,7 @@ pre_scan() {
 		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: mkdir -p ${_nmapdir}"
 		mkdir -p -m 700 ${_nmapdir}
 		if [ ! -d ${_nmapdir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() Error: No such directory, (${_nmapdir})"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_nmapdir})"
 			exit -255
 		fi
 	fi
@@ -158,7 +170,7 @@ pre_scan() {
 		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: mkdir -p ${_nucleidir}"
 		mkdir -p -m 700 ${_nucleidir}
 		if [ ! -d ${_nucleidir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() Error: No such directory, (${_nucleidir})"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_nucleidir})"
 			exit -255
 		fi
 	fi
@@ -167,11 +179,10 @@ pre_scan() {
 	chk_files=(${_dscan_xml} ${_pscan_xml} ${_pscan_targets} ${_nuclei_targets})
 	for _file in "${chk_files[@]}"; do
 		if [ -f ${_file} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]} Found ${_file}, Scan already running?, exit()"
+			echo "[$(mkdate "dt")] ${FUNCNAME[0]} [WARN]: Found ${_file}, Scan already running?, exit()"
 			exit -255
 		fi
 	done
-
 }
 
 #################
@@ -180,57 +191,85 @@ pre_scan() {
 run_scan() {
 	###############
 	# Nmap notes:
-	# * For some reason the --open flag needs one of the last optionsotherwise,
-	#   nmap will still write filtered port information into the log files
-	#   this will result in HUGE log files when scanning a lot of hosts
-	# * Don't use -v0 (silent) flag, instead redirect stdio to /dev/null otherwise
-	#   nmap will still write filtered port information to the output log files
-	#   regardless if --open has been set. https://github.com/nmap/nmap/issues/236
+	# * Latest version of nmap (from source): Nmap now writes filtered ports into the XML files
+	#   this can result in HUGE log files when doing full port scans on a lot of hosts
+	#   See: https://github.com/nmap/nmap/commit/38671f22259f87f564403dc6e91c1e4216fdb978
+	#   To disable this, comment out line 605 in output.cc and recompile:
+	#       output.cc:605    //output_rangelist_given_ports(LOG_XML, currentr->ports, currentr->count);
+	# * Silent option -v0
+	#   https://github.com/nmap/nmap/pull/265
 	###############
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() START"
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: START"
 
 	#------------------------------------------------------------------------------------#
 	# Nmap discovery scan
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Nmap Discovery scan, Starting..."
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Logfile (${_dscan_xml})"
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap discovery scan, Starting..."
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Logfile (${_dscan_xml})"
 
 		${_nmap} \
-			-n -sn \
+			-v0 -n -sn \
 			-PS21-23,25,53,80,110-111,135,139,143,161,443,445,993,995,1723,3306,3389,5900,8080 \
 			-PU53,67-69,111,123,135,137-139,161-162,445,500,514,520,631,1434,1900,4500,5353,49152 \
-			--min-parallelism 100 --min-hostgroup 100 --min-rate 20000 --randomize-hosts --disable-arp-ping --max-retries 1 \
+			--min-parallelism 100 --min-hostgroup 100 --min-rate 20000 --randomize-hosts --disable-arp-ping --max-retries 2 \
 		-iL ${_targetsf} -oX ${_dscan_xml} > /dev/null
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Nmap discovery scan, Complete."
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap discovery scan, Complete"
 
-	# Create portscan targets file
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Create Portscan targets (${_pscan_targets})"
+	# Create port scan targets file
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Create port scan targets (${_pscan_targets})"
 	${_nmapparse} --file ${_dscan_xml} --data-type ip > ${_pscan_targets}
 
 	#------------------------------------------------------------------------------------#
 	# Nmap port scan (full port scan)
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Nmap Portscan, Starting..."
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Logfile (${_pscan_xml})"
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap port scan, Starting..."
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Logfile (${_pscan_xml})"
 
 		${_nmap} \
-			 -sS -p- \
-			--script=${_nsedir}/ --script-timeout=3 \
-			--min-parallelism 100 --min-rate 20000 --min-hostgroup 100 --randomize-hosts \
-		--open -iL ${_pscan_targets} -oX ${_pscan_xml} > /dev/null
+			-v0 -sS -p- --open \
+			--script=${_nsedir}/ --script-timeout=5 \
+			--min-parallelism 100 --min-hostgroup 100 --host-timeout 10m --randomize-hosts \
+		-iL ${_pscan_targets} -oX ${_pscan_xml} > /dev/null
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Nmap portscan, Complete."
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap port scan, Complete"
 
 	# Create nuclei targets file (nmap httpx.nse results)
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [CMD]: Create Nuclei targets (${_nuclei_targets})"
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Create nuclei targets (${_nuclei_targets})"
 	${_nmapparse} --file ${_pscan_xml} --data-type httpx > ${_nuclei_targets}
 
 	#------------------------------------------------------------------------------------#
-	# Nuclei scan
+	# Nuclei scan (sends data to elasticsearch)
 	#------------------------------------------------------------------------------------#
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nuclei scan, Starting..."
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() END"
+	# Download latest nuclei templates
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Updating ${_nucleitpldir}..."
+	_gitcmd=`which git`
+	pushd `pwd`
+	cd ${_nucleitpldir}/ && ${_gitcmd} pull
+	popd
+
+	 ${_nuclei} -silent -no-color -disable-update-check -max-redirects 3 \
+		-report-config ${_conffile} -list ${_nuclei_targets} \
+		-templates ${_nucleitpldir} -exclude-id ${_confdir}/nuclei-templates.exclude
+
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nuclei scan, Complete"
+
+	#------------------------------------------------------------------------------------#
+	# Scan completed, send nmap logs to elasticsearch
+	# Note: Sacn times are saved in the log files, we can import this data at any time
+	#------------------------------------------------------------------------------------#
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Sending nmap logs to elasticsearch..."
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: nmap2es: ${_dscan_xml}"
+	${_nmap2es} -c ${_conffile} -t discovery -f ${_dscan_xml}
+
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: nmap2es: ${_pscan_xml}"
+	${_nmap2es} -c ${_conffile} -t portscan -f ${_pscan_xml}
+
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Complete"
+
+	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: END"
 }
 
 #############
