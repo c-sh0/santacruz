@@ -17,7 +17,6 @@ Options:
 -t, --targets [file]      :- Path to file containing a list of target hosts to scan (one per line)
 
 -h, --help      :- Show this help message and exit
--v, --verbose   :- Verbose output
 
 _EOF_
 
