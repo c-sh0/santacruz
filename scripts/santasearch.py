@@ -68,15 +68,16 @@ def p_results(es_idx,data,out):
                 match_at = d['event']['matched-at']
                 tid = d['event']['template-id']
 
-                m_name = ''
-                if 'matcher-name' in d['event']:
-                    m_name = d['event']['matcher-name']
+                cve = ''
+                if 'classification' in d['event']['info']:
+                    if d['event']['info']['classification']['cve-id']:
+                        cve = d['event']['info']['classification']['cve-id'][0]
 
                 if out =='csv':
-                   print(f"{es_idx},{ts},{ip},{match_at},{tid},{sev}")
+                   print(f"{es_idx},{ts},{sev},{iname},{match_at},{cve},{tid}")
 
                 else:
-                   print(f"{es_idx}: {ts}\t{ip}\t\t{match_at}\t{tid}\t{sev}")
+                   print(f"{es_idx}: {ts}\t{sev}\t\t{iname}\t\t{match_at}\t{cve}")
         else:
                 print(f"[ERROR]: Unknown index, ({es_idx})")
                 return sys.exit(-255)
@@ -141,6 +142,7 @@ def bld_ESquery(ctx):
                        "event.asn_name",
                        "event.asn_prefix",
                        "event.asn_source",
+                       "event.info.classification.cve-id",
                        "event.info.classification.cvss-score"
                  ]
             },
