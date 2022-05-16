@@ -1,0 +1,15 @@
+# Headers to include with all HTTP request
+header:
+  - 'X-Nuclei: nuclei'
+  - 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36'
+
+# Template exclude
+exclude-id:
+  - favicon-detection
+  - http-missing-security-headers
+  - HTTP-TRACE
+
+# Rate Limit configuration
+rate-limit: 500
+bulk-size: 50
+concurrency: 50
