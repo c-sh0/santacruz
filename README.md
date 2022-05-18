@@ -1,5 +1,5 @@
 # Santacruz
-**Status**: *In progress*
+**Status**: *In Development*
 
 Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 * An Original Idea? Nope.
@@ -48,38 +48,12 @@ By default, containers will not automaticaly start on system boot. The following
    ```
 See: https://docs.docker.com/config/containers/start-containers-automatically/
 
-## Sending data to Elasticsearch
-Quick Start
-
-## Nmap
-Nmap doesn't support output in json format (Shame!). The log will need to be converted before being sent to Elasticsearch. Run nmap with the `-oX` to save the ouput in XML format and then Import scan data into Elasticsearch using `nmap2es.py` *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
-   ```sh
-      nmap --open -oX data/nmap/nmap_scan.xml <target>
-      nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
-   ```
-
-## Nmap + Httpx
-Httpx is a great tool for determining if a port is running http(s). Using nmap + `httpx.nse` can save you an extra step during the reconnaissance phase. The script will run httpx on any open tcp ports discovered during the scan. (`nmap2es.py` supports nmap script output)
-   ```sh
-      nmap --open -script=nmap_nse/httpx.nse --script-args httpx_bin=/path/to/httpx -oX data/nmap/nmap_scan.xml <target>
-      nmap2es.py -c conf/santacruz.yml -f data/nmap/nmap_scan.xml
-   ```
-
-## Nuclei
-Nuclei has native support for Elasticsearch
-   ```sh
-      nuclei -report-config conf/santacruz.yml -u <target>
-   ```
-
-## Viewing data
-Since the data now lives in Elasticsearch it can be searched, parsed, and viewed via the Kibana Dashboard or by just about anything that supports http(s) and json (curl, wget, jq, etc..). This makes it easy for reporting and/or parsing the output for use with other tools. `santasearch.py` is a command line tool for doing just that. *See: <a href="doc/README.md" target="_blank">doc/README.md</a> for more information*
-
 ## Documentation
 <a href="doc/README.md" target="_blank">doc/README.md</a>
 
 ## Todo
-   * Logstash? (I see no need for it, yet?)
    * Re-do Documentation
+   * Logstash? (I see no need for it, yet?)
    * More stuff
 
 ## References
