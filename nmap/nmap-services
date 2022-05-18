@@ -1,0 +1,690 @@
+discard	9/tcp	0.003764	# sink null
+daytime	13/tcp	0.003927
+qotd	17/tcp	0.002346	# Quote of the Day
+chargen	19/tcp	0.002559	# ttytst source Character Generator | Character Generator
+ftp-data	20/tcp	0.001079	# File Transfer [Default Data]
+ftp	21/tcp	0.197667	# File Transfer [Control]
+ssh	22/tcp	0.182286	# Secure Shell Login
+telnet	23/tcp	0.221265
+priv-mail	24/tcp	0.001154	# any private mail system
+smtp	25/tcp	0.131314	# Simple Mail Transfer
+rsftp	26/tcp	0.007991	# RSFTP
+unknown	30/tcp	0.000527
+unknown	32/tcp	0.000339
+dsp	33/tcp	0.001016	# Display Support Protocol
+time	37/tcp	0.003161	# timserver
+nameserver	42/tcp	0.000803	# name | Host Name Server
+whois	43/tcp	0.000314	# nicname | Who Is
+tacacs	49/tcp	0.000665	# Login Host Protocol (TACACS)
+domain	53/tcp	0.048463	# Domain Name Server
+finger	79/tcp	0.006022
+http	80/tcp	0.484143	# World Wide Web HTTP
+hosts2-ns	81/tcp	0.012056	# HOSTS2 Name Server
+xfer	82/tcp	0.002923	# XFER Utility
+mit-ml-dev	83/tcp	0.000539	# MIT ML Device
+mit-ml-dev	85/tcp	0.000690	# MIT ML Device
+kerberos-sec	88/tcp	0.006072	# kerberos | Kerberos (v5) | Kerberos
+su-mit-tg	89/tcp	0.000376	# SU/MIT Telnet Gateway
+dnsix	90/tcp	0.000652	# DNSIX Securit Attribute Token Map
+metagram	99/tcp	0.000326	# Metagram Relay
+newacct	100/tcp	0.002133	# [unauthorized use]
+pop3pw	106/tcp	0.005934	# 3com-tsmux | Eudora compatible PW changer | 3COM-TSMUX
+pop3	110/tcp	0.077142	# PostOffice V.3 | Post Office Protocol - Version 3
+rpcbind	111/tcp	0.030034	# sunrpc | portmapper, rpcbind | SUN Remote Procedure Call
+ident	113/tcp	0.012370	# auth | ident, tap, Authentication Service | Authentication Service
+nntp	119/tcp	0.003262	# Network News Transfer Protocol
+ntp	123/tcp	0.000138	# Network Time Protocol
+msrpc	135/tcp	0.047798	# epmap | Microsoft RPC services | DCE endpoint resolution
+netbios-ssn	139/tcp	0.050809	# NETBIOS Session Service
+imap	143/tcp	0.050420	# Interim Mail Access Protocol v2 | Internet Message Access Protocol
+news	144/tcp	0.004981	# uma | NewS window system | Universal Management Architecture
+iso-tp0	146/tcp	0.000577	# ISO-IP0
+snmp	161/tcp	0.000790
+cmip-man	163/tcp	0.000590	# CMIP/TCP Manager
+bgp	179/tcp	0.010538	# Border Gateway Protocol
+smux	199/tcp	0.015945	# SNMP Unix Multiplexer
+914c-g	211/tcp	0.000427	# 914c/g | Texas Instruments 914C/G Terminal
+anet	212/tcp	0.000364	# ATEXSSTR
+rsh-spx	222/tcp	0.000941	# Berkeley rshd with SPX auth
+unknown	254/tcp	0.001832
+unknown	255/tcp	0.002409
+bgmp	264/tcp	0.001029
+http-mgmt	280/tcp	0.001844
+unknown	306/tcp	0.000464
+asip-webadmin	311/tcp	0.001857	# appleshare ip webadmin | AppleShare IP WebAdmin
+unknown	340/tcp	0.000627
+odmr	366/tcp	0.000715
+ldap	389/tcp	0.004717	# Lightweight Directory Access Protocol
+timbuktu	407/tcp	0.001129
+icad-el	425/tcp	0.000326	# ICAD
+svrloc	427/tcp	0.005382	# Server Location
+https	443/tcp	0.208669	# secure http (SSL)
+snpp	444/tcp	0.004466	# Simple Network Paging Protocol
+microsoft-ds	445/tcp	0.056944	# SMB directly over IP
+appleqtc	458/tcp	0.000314	# apple quick time
+kpasswd5	464/tcp	0.001192	# Kerberos (v5) | kpasswd
+smtps	465/tcp	0.013888	# submissions | igmpv3lite | urd | smtp protocol over TLS/SSL (was ssmtp) | URL Rendesvous Directory for SSM | IGMP over UDP for SSM | URL Rendezvous Directory for SSM | Message Submission over TLS protocol
+retrospect	497/tcp	0.001179	# Retrospect backup and restore service
+isakmp	500/tcp	0.001129
+exec	512/tcp	0.000841	# biff | comsat | BSD rexecd(8) | remote process execution; authentication performed using passwords and UNIX login names | used by mail system to notify users of new mail received; currently receives messages only from processes on the same machine
+login	513/tcp	0.005595	# who | BSD rlogind(8) | remote login a la telnet; automatic authentication performed based on priviledged port numbers and distributed data bases which identify "authentication domains" | maintains data bases showing who's logged in to machines on a local net and the load average of the machine
+shell	514/tcp	0.011078	# syslog | BSD rshd(8) | cmd like exec, but automatic authentication is performed as for login server
+printer	515/tcp	0.007214	# spooler (lpd) | spooler
+uucp-rlogin	541/tcp	0.000489
+klogin	543/tcp	0.005282	# Kerberos (v4/v5)
+kshell	544/tcp	0.005269	# krcmd Kerberos (v4/v5) | krcmd
+afp	548/tcp	0.012395	# afpovertcp | AFP over TCP
+rtsp	554/tcp	0.008104	# Real Time Stream Control Protocol | Real Time Streaming Protocol (RTSP)
+snews	563/tcp	0.000916	# nntps | nntp protocol over TLS/SSL (was snntp)
+submission	587/tcp	0.019721	# Message Submission
+http-rpc-epmap	593/tcp	0.001242	# HTTP RPC Ep Map
+apple-xsrvr-admin	625/tcp	0.001869	# dec_dlm | dec-dlm | Apple Mac Xserver admin | DEC DLM
+ipp	631/tcp	0.006160	# ipps | Internet Printing Protocol -- for one implementation see http://www.cups.org (Common UNIX Printing System) | IPP (Internet Printing Protocol) | Internet Printing Protocol over HTTPS
+ldapssl	636/tcp	0.002083	# ldaps | LDAP over SSL | ldap protocol over TLS/SSL (was sldap)
+ldp	646/tcp	0.006549	# Label Distribution
+rrp	648/tcp	0.000577	# Registry Registrar Protocol (RRP)
+resvc	691/tcp	0.000376	# msexch-routing | The Microsoft Exchange 2000 Server Routing Service | MS Exchange Routing
+agentx	705/tcp	0.000414
+entrustmanager	709/tcp	0.000125	# entrust-kmsh | EntrustManager - NorTel DES auth network see tcp port 389 | Entrust Key Management Service Handler
+cisco-tdp	711/tcp	0.000401	# Cisco TDP
+netviewdm2	730/tcp	0.000100	# IBM NetView DM/6000 send/tcp
+netviewdm3	731/tcp	0.000100	# IBM NetView DM/6000 receive/tcp
+kerberos-adm	749/tcp	0.000326	# Kerberos 5 admin/changepw | kerberos administration
+qsc	787/tcp	0.001455
+mdbs_daemon	800/tcp	0.000427	# mdbs-daemon
+ccproxy-http	808/tcp	0.002296	# CCProxy HTTP/Gopher/FTP (over HTTP) proxy
+rsync	873/tcp	0.003400	# Rsync server ( http://rsync.samba.org )
+unknown	880/tcp	0.000464
+accessbuilder	888/tcp	0.000928	# cddbp | or Audio CD Database | CD Database Protocol
+sun-manageconsole	898/tcp	0.000339	# Solaris Management Console Java listener (Solaris 8 & 9)
+omginitialrefs	900/tcp	0.000452	# OMG Initial Refs
+samba-swat	901/tcp	0.000552	# smpnameres | Samba SWAT tool.  Also used by ISS RealSecure. | SMPNAMERES
+iss-realsecure	902/tcp	0.001468	# ideafarm-door | ISS RealSecure Sensor | self documenting Telnet Door | self documenting Door: send 0x00 for info
+apex-mesh	912/tcp	0.000527	# APEX relay-relay service
+unknown	987/tcp	0.000427
+ftps	990/tcp	0.005570	# ftp protocol, control, over TLS/SSL
+telnets	992/tcp	0.000903	# telnet protocol over TLS/SSL
+imaps	993/tcp	0.027199	# imap4 protocol over TLS/SSL | IMAP over TLS protocol
+pop3s	995/tcp	0.029921	# POP3 protocol over TLS/SSL | pop3 protocol over TLS/SSL (was spop3) | POP3 over TLS protocol
+garcon	999/tcp	0.000966	# puprouter | applix | Applix ac
+cadlock	1000/tcp	0.003149	# cadlock2
+webpush	1001/tcp	0.000364	# HTTP Web Push
+windows-icfw	1002/tcp	0.000690	# Windows Internet Connection Firewall or Internet Locator Server for NetMeeting.
+exp2	1022/tcp	0.001217	# RFC3692-style Experiment 2 (*)    [RFC4727] | RFC3692-style Experiment 2
+netvenuechat	1023/tcp	0.000953	# Nortel NetVenue Notification, Chat, Intercom
+kdm	1024/tcp	0.002722	# K Display Manager (KDE version of xdm)
+NFS-or-IIS	1025/tcp	0.022406	# blackjack | IIS, NFS, or listener RFS remote_file_sharing | network blackjack
+LSA-or-nterm	1026/tcp	0.010237	# cap | nterm remote_login network_terminal | Calendar Access Protocol
+IIS	1027/tcp	0.006724	# 6a44 | IPv6 Behind NAT44 CPEs
+unknown	1028/tcp	0.003421
+ms-lsa	1029/tcp	0.003801	# solid-mux | Solid Mux Server
+iad1	1030/tcp	0.002860	# BBN IAD
+iad2	1031/tcp	0.002221	# BBN IAD
+iad3	1032/tcp	0.001719	# BBN IAD
+netinfo	1033/tcp	0.001342	# netinfo-local | Netinfo is apparently on many OS X boxes. | local netinfo port
+zincite-a	1034/tcp	0.001064	# activesync | Zincite.A backdoor | ActiveSync Notifications
+multidropper	1035/tcp	0.001216	# mxxrlogin | A Multidropper Adware, or PhoneFree | MX-XR RPC
+nsstp	1036/tcp	0.001216	# Nebula Secure Segment Transfer Protocol
+ams	1037/tcp	0.001216
+mtqp	1038/tcp	0.002053	# Message Tracking Query Protocol
+sbl	1039/tcp	0.002129	# Streamlined Blackhole
+netsaint	1040/tcp	0.001342	# netarx | Netsaint status daemon | Netarx Netcare
+danf-ak2	1041/tcp	0.002433	# AK2 Product
+afrog	1042/tcp	0.000988	# Subnet Roaming
+boinc	1043/tcp	0.000841	# boinc-client | BOINC Client Control or Microsoft IIS | BOINC Client Control
+dcutility	1044/tcp	0.002205	# Dev Consortium Utility
+fpitp	1045/tcp	0.000380	# Fingerprint Image Transfer Protocol
+wfremotertm	1046/tcp	0.000380	# WebFilter Remote Monitor
+neod1	1047/tcp	0.000760	# Sun's NEO Object Request Broker
+neod2	1048/tcp	0.002357	# Sun's NEO Object Request Broker
+td-postman	1049/tcp	0.002357	# Tobit David Postman VPMN
+java-or-OTGfileshare	1050/tcp	0.001669	# cma | J2EE nameserver, also OTG, also called Disk/Application extender. Could also be MiniCommand backdoor OTGlicenseserv | CORBA Management Agent
+optima-vnet	1051/tcp	0.000760	# Optima VNET
+ddt	1052/tcp	0.000760	# Dynamic DNS tools | Dynamic DNS Tools
+remote-as	1053/tcp	0.002357	# Remote Assistant (RA)
+brvread	1054/tcp	0.002357
+ansyslmd	1055/tcp	0.000760	# ANSYS - License Manager
+vfo	1056/tcp	0.002357
+startron	1057/tcp	0.000380
+nim	1058/tcp	0.001380
+nimreg	1059/tcp	0.001342
+polestar	1060/tcp	0.000760
+kiosk	1061/tcp	0.000380
+veracity	1062/tcp	0.000760
+kyoceranetdev	1063/tcp	0.000380
+jstel	1064/tcp	0.002357
+syscomlan	1065/tcp	0.002357
+fpo-fns	1066/tcp	0.001901
+instl_boots	1067/tcp	0.000728	# instl-boots | Installation Bootstrap Proto. Serv.
+instl_bootc	1068/tcp	0.000941	# instl-bootc | Installation Bootstrap Proto. Cli.
+cognex-insight	1069/tcp	0.001901
+gmrupdateserv	1070/tcp	0.000380
+bsquare-voip	1071/tcp	0.002205
+cardax	1072/tcp	0.000380
+bridgecontrol	1073/tcp	0.000380	# Bridge Control
+warmspotMgmt	1074/tcp	0.001216	# Warmspot Management Protocol
+rdrmshc	1075/tcp	0.000380
+imgames	1077/tcp	0.000380
+avocent-proxy	1078/tcp	0.000380	# Avocent Proxy Protocol
+asprovatalk	1079/tcp	0.000380
+socks	1080/tcp	0.001518
+pvuniwien	1081/tcp	0.000380
+amt-esd-prot	1082/tcp	0.000380
+ansoft-lm-1	1083/tcp	0.000427	# Anasoft License Manager
+webobjects	1085/tcp	0.000380	# Web Objects
+cplscrambler-lg	1086/tcp	0.000456	# CPL Scrambler Logging
+cplscrambler-al	1088/tcp	0.000456	# CPL Scrambler Alarm Log
+proofd	1093/tcp	0.000380
+rootd	1094/tcp	0.000380
+cnrprotocol	1096/tcp	0.000380	# Common Name Resolution Protocol
+sunclustermgr	1097/tcp	0.000456	# Sun Cluster Manager
+rmiactivation	1098/tcp	0.000380	# RMI Activation
+rmiregistry	1099/tcp	0.000380	# RMI Registry
+mctp	1100/tcp	0.000380
+xrl	1104/tcp	0.000380
+isoipsigport-1	1106/tcp	0.000380
+isoipsigport-2	1107/tcp	0.000380
+ratio-adp	1108/tcp	0.000380
+nfsd-status	1110/tcp	0.005809	# nfsd-keepalive | webadmstart | Cluster status info | Start web admin server | Client status info
+lmsocialserver	1111/tcp	0.001140	# LM Social Server
+elfiq-repl	1148/tcp	0.000380	# Elfiq Replication Service
+tripwire	1169/tcp	0.000380
+aeroflight-ads	1218/tcp	0.001064	# AeroFlight ADs
+hotline	1234/tcp	0.001217	# search-agent | Infoseek Search Agent
+hermes	1248/tcp	0.000477
+cspmlockmgr	1272/tcp	0.000380
+husky	1310/tcp	0.000380
+rxmon	1311/tcp	0.000760
+lotusnotes	1352/tcp	0.001154	# lotusnote | Lotus Note
+ms-sql-s	1433/tcp	0.007929	# Microsoft-SQL-Server
+citrix-ica	1494/tcp	0.001255	# ica
+vlsi-lm	1500/tcp	0.000627	# VLSI License Manager
+sas-3	1501/tcp	0.000602	# saiscm | Satellite-data Acquisition System 3
+imtc-mcs	1503/tcp	0.000640	# Databeam
+oracle	1521/tcp	0.001568	# ncube-lm | Oracle Database | nCube License Manager
+hecmtl-db	1551/tcp	0.000050
+netview-aix-6	1666/tcp	0.000577
+nsjtp-ctrl	1687/tcp	0.000380
+mps-raft	1700/tcp	0.000836
+l2f	1701/tcp	0.000076	# l2tp
+fj-hdnet	1717/tcp	0.000912
+h323gatedisc	1718/tcp	0.000380	# H.323 Multicast Gatekeeper Discover
+h323q931	1720/tcp	0.014277	# h323hostcall | Interactive media | H.323 Call Control Signalling | H.323 Call Control
+pptp	1723/tcp	0.032468	# Point-to-point tunnelling protocol
+wms	1755/tcp	0.003350	# Windows media service | ms-streaming
+landesk-rc	1761/tcp	0.001756	# LANDesk Remote Control | cft-0
+unknown	1783/tcp	0.000380
+msmq	1801/tcp	0.002585	# Microsoft Message Queuing | Microsoft Message Que
+netopia-vo2	1840/tcp	0.000380
+msnp	1863/tcp	0.000684	# MSN Messenger
+paradym-31	1864/tcp	0.000684	# paradym-31port | Paradym 31 Port
+upnp	1900/tcp	0.003977	# ssdp | Universal PnP | SSDP
+rtmp	1935/tcp	0.001179	# macromedia-fcs | Macromedia FlasComm Server | Macromedia Flash Communications Server MX | Macromedia Flash Communications server MX
+sentinelsrm	1947/tcp	0.000380
+x25-svc-port	1998/tcp	0.001731	# cisco X.25 service (XOT)
+tcp-id-port	1999/tcp	0.000364	# cisco identification port
+cisco-sccp	2000/tcp	0.010112	# cisco SCCP (Skinny Client Control Protocol) | Cisco SCCP | Cisco SCCp
+dc	2001/tcp	0.007339	# wizard | or nfr20 web queries | curry
+globe	2002/tcp	0.001744
+finger	2003/tcp	0.001179	# brutus | GNU finger (cfingerd) | Brutus Server
+mailbox	2004/tcp	0.001016	# emce | CCWS mm conf
+deslogin	2005/tcp	0.001731	# oracle | berknet | encrypted symmetric telnet/login
+invokator	2006/tcp	0.001066	# raid-cd | raid
+dectalk	2007/tcp	0.000878	# raid-am
+conf	2008/tcp	0.000903	# terminaldb
+news	2009/tcp	0.000841	# whosockami
+search	2010/tcp	0.000803	# pipe_server | pipe-server | Or nfr411
+xinupageserver	2020/tcp	0.000364
+device2	2030/tcp	0.000514
+glogger	2033/tcp	0.000339
+nfs	2049/tcp	0.006110	# networked file system
+dlsrpn	2065/tcp	0.000815	# Data Link Switch Read Port Number
+amiganetfs	2100/tcp	0.000380	# Amiga Network Filesystem
+zephyr-clt	2103/tcp	0.002661	# Zephyr serv-hm connection
+eklogin	2105/tcp	0.002120	# minipay | Kerberos (v4) encrypted rlogin | MiniPay
+msmq-mgmt	2107/tcp	0.002737	# bintec-admin | Microsoft Message Queuing (IANA calls this bintec-admin) | BinTec Admin
+gsigatekeeper	2119/tcp	0.000380
+ccproxy-ftp	2121/tcp	0.005834	# scientia-ssdb | CCProxy FTP Proxy | SCIENTIA-SSDB
+gris	2135/tcp	0.000380	# Grid Resource Information Server
+lv-ffx	2144/tcp	0.000380	# Live Vault Fast Object Transfer
+apc-2160	2160/tcp	0.000380	# APC 2160
+apc-agent	2161/tcp	0.001521	# apc-2161 | American Power Conversion | APC 2161
+tivoconnect	2190/tcp	0.000380	# TiVoConnect Beacon
+EtherNetIP-1	2222/tcp	0.000608	# EtherNet/IP-1 | EtherNet-IP-1 | EtherNet/IP I/O
+apc-2260	2260/tcp	0.000380	# APC 2260
+compaqdiag	2301/tcp	0.001242	# cpq-wbem | Compaq remote diagnostic/management | Compaq HTTP
+docker	2375/tcp	0.000076	# docker.com | Docker REST API (plain text)
+docker	2376/tcp	0.000076	# docker-s | docker.com | Docker REST API (ssl)
+etcd-client	2379/tcp	0.000000	# etcd client communication
+etcd-server	2380/tcp	0.000000	# etcd server to server communication
+compaq-https	2381/tcp	0.000380	# Compaq HTTPS
+ms-olap4	2383/tcp	0.001369	# MS OLAP 4 | Microsoft OLAP
+fmpro-fdal	2399/tcp	0.000380	# FileMaker, Inc. - Data Access Layer
+cvspserver	2401/tcp	0.001480	# CVS network server
+groove	2492/tcp	0.000380
+rtsserv	2500/tcp	0.000464	# Resource Tracking system server
+ms-v-worlds	2525/tcp	0.000456	# MS V-Worlds
+zebra	2601/tcp	0.002032	# discp-client | zebra vty | discp client
+ripd	2602/tcp	0.000790	# discp-server | RIPd vty | discp server
+ospfd	2604/tcp	0.000765	# nsc-ccs | OSPFd vty | NSC CCS
+bgpd	2605/tcp	0.000514	# nsc-posa | BGPd vty | NSC POSA
+connection	2607/tcp	0.000380	# Dell Connection
+sms-rcinfo	2701/tcp	0.000836	# SMS RCINFO
+sms-xfer	2702/tcp	0.000760	# SMS XFER
+pn-requester	2717/tcp	0.003345	# PN REQUESTER
+pn-requester2	2718/tcp	0.000380	# PN REQUESTER 2
+corbaloc	2809/tcp	0.000439	# Corba | CORBA LOC
+gsiftp	2811/tcp	0.000380	# GSI FTP
+icslap	2869/tcp	0.002129	# Universal Plug and Play Device Host, SSDP Discovery Service
+dxmessagebase2	2875/tcp	0.000380	# DX Message Base Transport Protocol
+symantec-av	2967/tcp	0.002357	# ssc-agent | Symantec AntiVirus (rtvscan.exe) | SSC-AGENT
+iss-realsec	2998/tcp	0.000351	# realsecure | ISS RealSecure IDS Remote Console Admin port | Real Secure
+ppp	3000/tcp	0.004115	# remoteware-cl | hbci | User-level ppp daemon, or chili!soft asp | HBCI | RemoteWare Client
+nessus	3001/tcp	0.003124	# origo-native | Nessus Security Scanner (www.nessus.org) Daemon or chili!soft asp | OrigoDB Server Native Interface
+deslogin	3005/tcp	0.000477	# geniuslm | encrypted symmetric telnet/login | Genius License Manager
+event_listener	3017/tcp	0.000380	# event-listener | Event Listener
+eppc	3031/tcp	0.000380	# Remote AppleEvents/PPC Toolbox
+powerchute	3052/tcp	0.000966	# apc-3052 | APC 3052
+csd-mgmt-port	3071/tcp	0.000380	# xplat-replicate | ContinuStor Manager Port | Crossplatform replication protocol
+d2000kernel	3119/tcp	0.000152	# D2000 Kernel Port
+squid-http	3128/tcp	0.004516	# ndl-aas | Active API Server Port
+avsecuremgmt	3211/tcp	0.000380	# Avocent Secure Management
+iscsi	3260/tcp	0.001064	# iscsi-target | iSCSI port
+globalcatLDAP	3268/tcp	0.001229	# msft-gc | Global Catalog LDAP | Microsoft Global Catalog
+globalcatLDAPssl	3269/tcp	0.001142	# msft-gc-ssl | Global Catalog LDAP over ssl | Microsoft Global Catalog with LDAP/SSL
+netassistant	3283/tcp	0.000760	# #ERROR:Apple Remote Desktop (Net Assistant) | Apple Remote Desktop Net Assistant reporting feature | Net Assistant
+ceph	3300/tcp	0.000380	# Ceph monitor
+unknown	3301/tcp	0.000380
+mysql	3306/tcp	0.045390
+active-net	3323/tcp	0.000380	# Active Networks
+active-net	3325/tcp	0.000380	# Active Networks
+dec-notes	3333/tcp	0.000790	# DEC Notes
+btrieve	3351/tcp	0.000380	# Btrieve port
+satvid-datalnk	3367/tcp	0.000380	# Satellite Video Data Link
+msdtc	3372/tcp	0.000339	# tip2 | MS distributed transaction coordinator | TIP 2
+ms-wbt-server	3389/tcp	0.083904	# Microsoft Remote Display Protocol (aka ms-term-serv, microsoft-rdp) | MS WBT Server
+unknown	3404/tcp	0.000380
+nppmp	3476/tcp	0.000532	# NVIDIA Mgmt Protocol
+apcupsd	3551/tcp	0.000380	# Apcupsd Information Port
+nati-svrloc	3580/tcp	0.000380	# NATI-ServiceLocator
+apple-sasl	3659/tcp	0.000380	# Apple SASL
+rendezvous	3689/tcp	0.002283	# daap | Rendezvous Zeroconf (used by Apple/iTunes) | Digital Audio Access Protocol (iTunes)
+svn	3690/tcp	0.001597	# Subversion
+adobeserver-3	3703/tcp	0.002357	# Adobe Server 3
+sitewatch-s	3766/tcp	0.000380	# SSL e-watch sitewatch server
+bfd-control	3784/tcp	0.000380	# BFD Control Protocol
+ibm-mgr	3801/tcp	0.000380	# ibm manager service
+netmpi	3827/tcp	0.000380	# Netadmin Systems MPI service
+mapper-ws_ethd	3986/tcp	0.003977	# mapper-ws-ethd | MAPPER workstation server
+dnx	3998/tcp	0.000380	# Distributed Nagios Executor Service
+remoteanything	4000/tcp	0.001794	# terabase | neoworx remote-anything remote control | Terabase
+newoak	4001/tcp	0.002129
+mlchat-proxy	4002/tcp	0.000765	# mlnet - MLChat P2P chat proxy | pxc-spvr-ft
+pxc-splr-ft	4003/tcp	0.000380
+lockd	4045/tcp	0.001468	# npp | Network Paging Protocol
+ddrepl	4126/tcp	0.000380	# Data Domain Replication Service
+nuauth	4129/tcp	0.000380	# NuFW authentication protocol
+vrml-multi-use	4242/tcp	0.000456	# VRML Multi User Systems or CrashPlan http://support.code42.com/CrashPlan/Latest/Configuring/Network#Networking_FAQs
+pharos	4443/tcp	0.000760
+krb524	4444/tcp	0.001041	# nv-video | Kerberos 5 to 4 ticket xlator | NV Video default
+privatewire	4449/tcp	0.000380
+edonkey	4662/tcp	0.000828	# oms | eDonkey file sharing (Donkey) | OrbitNet Message Service
+radmin	4899/tcp	0.003337	# radmin-port | Radmin (www.radmin.com) remote PC control software | RAdmin Port
+upnp	5000/tcp	0.006423	# commplex-main | Universal PnP, also Free Internet Chess Server
+commplex-link	5001/tcp	0.003023
+rfe	5002/tcp	0.000765	# Radio Free Ethernet | radio free ethernet
+filemaker	5003/tcp	0.001756	# fmpro-internal | Filemaker Server - http://www.filemaker.com/ti/104289.html | FileMaker, Inc. - Proprietary transport | FileMaker, Inc. - Proprietary name binding
+avt-profile-1	5004/tcp	0.000532	# RTP media data [RFC 3551][RFC 4571] | RTP media data
+avt-profile-2	5005/tcp	0.000076	# RTP control protocol [RFC 3551][RFC 4571] | RTP control protocol
+wsm-server	5006/tcp	0.000000	# wsm server
+wsm-server-ssl	5007/tcp	0.000000	# wsm server ssl
+synapsis-edge	5008/tcp	0.000000	# Synapsis EDGE
+airport-admin	5009/tcp	0.004416	# winfs | Apple AirPort WAP Administration | Microsoft Windows Filesystem
+telelpathstart	5010/tcp	0.000138	# TelepathStart
+telelpathattack	5011/tcp	0.000088	# TelepathAttack
+nsp	5012/tcp	0.000076	# NetOnTap Service
+fmpro-v6	5013/tcp	0.000076	# FileMaker, Inc. - Proprietary transport
+onpsocket	5014/tcp	0.000076	# Overlay Network Protocol
+fmwp	5015/tcp	0.000076	# FileMaker, Inc. - Web publishing
+unknown	5016/tcp	0.000076
+unknown	5017/tcp	0.000076
+unknown 5018/tcp	0.000518   # unknown
+unknown 5019/tcp	0.000518   # unknown
+zenginkyo-1	5020/tcp	0.000076
+zenginkyo-2	5021/tcp	0.000076
+mice	5022/tcp	0.000000	# mice server
+htuilsrv	5023/tcp	0.000076	# Htuil Server for PLD2
+scpi-telnet	5024/tcp	0.000000
+scpi-raw	5025/tcp	0.000000
+strexec-d	5026/tcp	0.000000	# Storix I/O daemon (data)
+strexec-s	5027/tcp	0.000000	# Storix I/O daemon (stat)
+qvr	5028/tcp	0.000000	# Quiqum Virtual Relais
+infobright	5029/tcp	0.000000	# Infobright Database Server
+surfpass	5030/tcp	0.000380
+dmp	5031/tcp	0.000000	# Direct Message Protocol
+signacert-agent	5032/tcp	0.000000	# SignaCert Enterprise Trust Server Agent
+jtnetd-server	5033/tcp	0.000228	# Janstor Secure Data
+jtnetd-status	5034/tcp	0.000000	# Janstor Status
+unknown 5035/tcp	0.000518   # unknown
+unknown 5036/tcp	0.000518   # unknown
+unknown 5037/tcp	0.000518   # unknown
+unknown 5038/tcp	0.000518   # unknown
+unknown 5039/tcp	0.000518   # unknown
+unknown	5040/tcp	0.000152
+unknown   5041/tcp     0.000518   # unknown
+asnaacceler8db	5042/tcp	0.000000
+swxadmin	5043/tcp	0.000000	# ShopWorX Administration
+lxi-evntsvc	5044/tcp	0.000000	# LXI Event Service
+osp	5045/tcp	0.000000	# Open Settlement Protocol
+vpm-udp	5046/tcp	0.000000	# Vishay PM UDP Service
+iscape	5047/tcp	0.000000	# iSCAPE Data Broadcasting
+texai	5048/tcp	0.000000	# Texai Message Service
+ivocalize	5049/tcp	0.000000	# iVocalize Web Conference
+mmcc	5050/tcp	0.002584	# multimedia conference control tool
+ida-agent	5051/tcp	0.003649	# ita-agent | Symantec Intruder Alert | ITA Agent
+sip	5060/tcp	0.010613	# Session Initiation Protocol (SIP)
+admd	5100/tcp	0.000778	# socalia | (chili!soft asp admin port) or Yahoo pager | Socalia service mux
+admdog	5101/tcp	0.005156	# talarian-udp | talarian-tcp | (chili!soft asp) | Talarian_TCP | Talarian_UDP
+admeng	5102/tcp	0.000602	# oms-nonsecure | (chili!soft asp) | Oracle OMS non-secure
+barracuda-bbs	5120/tcp	0.002129	# Barracuda Backup Protocol
+aol	5190/tcp	0.004190	# America-Online.  Also can be used by ICQ | America-Online
+unknown	5214/tcp	0.000532
+xmpp-client	5222/tcp	0.000380	# XMPP Client Connection
+hp-server	5225/tcp	0.000760	# HP Server
+hp-status	5226/tcp	0.000760	# HP Status
+xmpp-server	5269/tcp	0.000380	# XMPP Server Connection
+wsdapi	5357/tcp	0.005474	# Web Services for Devices
+pcduo	5405/tcp	0.000314	# netsupport | RemCon PC-Duo - new port | NetSupport
+statusd	5414/tcp	0.000380
+park-agent	5431/tcp	0.000684	# PARK AGENT
+postgresql	5432/tcp	0.004090	# PostgreSQL database server | PostgreSQL Database
+hotline	5500/tcp	0.000690	# Hotline file sharing client/server | fcp-addr-srvr1
+secureidprop	5510/tcp	0.000339	# ACE/Server services
+sdadmind	5550/tcp	0.000853	# cbus | ACE/Server services | Model Railway control using the CBUS message protocol
+freeciv	5555/tcp	0.001305	# personal-agent | Personal Agent
+westec-connect	5566/tcp	0.000608	# Westec Connect
+esmagent	5601/tcp	0.000000	# Enterprise Security Agent
+pcanywheredata	5631/tcp	0.006248
+beorl	5633/tcp	0.000380	# BE Operations Request Listener
+nrpe	5666/tcp	0.006614	# Nagios NRPE | Nagios Remote Plugin Executor
+activesync	5679/tcp	0.000590	# dccm | Microsoft ActiveSync PDY synchronization | Direct Cable Connect Manager
+dpm	5718/tcp	0.000380	# DPM Communication Server
+vnc-http	5800/tcp	0.005947	# Virtual Network Computer HTTP Access, display 0
+vnc-http-1	5801/tcp	0.000841	# Virtual Network Computer HTTP Access, display 1
+unknown	5810/tcp	0.000380
+unknown	5825/tcp	0.000380
+unknown	5877/tcp	0.000380
+vnc	5900/tcp	0.023560	# rfb | Virtual Network Computer display 0 | Remote Framebuffer
+vnc-1	5901/tcp	0.002145	# Virtual Network Computer display 1
+vnc-2	5902/tcp	0.000715	# Virtual Network Computer display 2
+vnc-3	5903/tcp	0.000326	# Virtual Network Computer display 3
+cm	5910/tcp	0.000380	# Context Management
+cpdlc	5911/tcp	0.000380	# Controller Pilot Data Link Communication
+unknown	5925/tcp	0.000380
+unknown	5959/tcp	0.000380
+unknown	5960/tcp	0.000380
+unknown	5961/tcp	0.000380
+unknown	5962/tcp	0.000380
+wbem-rmi	5987/tcp	0.000380	# WBEM RMI
+wbem-http	5988/tcp	0.000380	# WBEM CIM-XML (HTTP)
+wbem-https	5989/tcp	0.000380	# WBEM CIM-XML (HTTPS)
+X11	6000/tcp	0.005683	# X Window server
+X11:1	6001/tcp	0.011730	# X Window server
+X11:2	6002/tcp	0.001518	# X Window server
+X11:3	6003/tcp	0.000351	# X Window server
+X11:4	6004/tcp	0.002597	# X Window server
+X11:5	6005/tcp	0.000602	# X Window server
+X11:59	6059/tcp	0.000760	# X Window server
+backupexec	6101/tcp	0.000452	# synchronet-rtc | Backup Exec UNIX and 95/98/ME Aent | SynchroNet-rtc
+isdninfo	6106/tcp	0.000314	# mpsserver | i4lmond | MPS Server
+dtspc	6112/tcp	0.001656	# dtspcd | CDE subprocess control | Desk-Top Sub-Process Control Daemon
+backup-express	6123/tcp	0.000380	# Backup Express
+unknown	6129/tcp	0.000380
+unknown	6156/tcp	0.000380
+redis	6379/tcp	0.000076	# An advanced key-value cache and store
+clariion-evr01	6389/tcp	0.000380
+sun-sr-https	6443/tcp	0.000000	# Service Registry Default HTTPS Domain
+netop-rc	6502/tcp	0.000314	# boks_servm | boks-servm | NetOp Remote Control (by Danware Data A/S) | BoKS Servm
+mythtv	6543/tcp	0.001167	# lds-distrib | lds_distrib
+parsec-master	6580/tcp	0.000380	# Parsec Masterserver
+unknown	6646/tcp	0.003649
+irc	6666/tcp	0.001179	# internet relay chat server
+irc	6667/tcp	0.000652	# Internet Relay Chat
+smc-http	6788/tcp	0.000380
+ibm-db2-admin	6789/tcp	0.000760	# radg | smc-https | IBM DB2 | SMC-HTTPS | GSS-API for the Oracle Remote Administration Daemon
+bittorrent-tracker	6881/tcp	0.000640	# BitTorrent tracker
+jetstream	6901/tcp	0.000380	# Novell Jetstream messaging protocol
+acmsoda	6969/tcp	0.000389
+afs3-fileserver	7000/tcp	0.001995	# file server itself, msdos | file server itself
+afs3-callback	7001/tcp	0.000891	# callbacks to cache managers
+afs3-prserver	7002/tcp	0.000351	# users & groups database
+afs3-bos	7007/tcp	0.000314	# basic overseer process
+doceri-ctl	7019/tcp	0.000836	# doceri-view | doceri drawing service control | doceri drawing service screen view
+realserver	7070/tcp	0.004328	# arcp | ARCP
+unknown 7081/tcp	0.000518   # unknown
+unknown 7082/tcp	0.000518   # unknown
+font-service	7100/tcp	0.000928	# X Font Service
+unknown	7106/tcp	0.000380
+fodms	7200/tcp	0.000439	# FODMS FLIP
+unknown	7625/tcp	0.000380
+soap-http	7627/tcp	0.000380	# SOAP Service Port
+unknown 7695/tcp	0.000518   # unknown
+unknown 7696/tcp	0.000518   # unknown
+scriptview	7741/tcp	0.000380	# ScriptView Network
+cbt	7777/tcp	0.000380
+interwise	7778/tcp	0.000380
+unknown	7911/tcp	0.000380
+nsrexecd	7937/tcp	0.001455	# Legato NetWorker
+lgtomapper	7938/tcp	0.001229	# Legato portmapper
+http-alt	8000/tcp	0.009710	# irdmi | A common alternative http port | iRDMI
+vcom-tunnel	8001/tcp	0.000532	# VCOM Tunnel
+teradataordbms	8002/tcp	0.001216	# Teradata ORDBMS
+mcreport	8003/tcp	0.000076	# Mulberry Connect Reporting Service
+p2pevolvenet	8004/tcp	0.000000	# Opensource Evolv Enterprise Platform P2P Network Node Connection Protocol
+wpl-analytics	8006/tcp	0.000076	# wpl-disc | World Programming analytics | World Programming analytics discovery
+ajp12	8007/tcp	0.000477	# warppipe | Apache JServ Protocol 1.x | I/O oriented cluster computing software
+http	8008/tcp	0.006843	# http-alt | IBM HTTP server | HTTP Alternate
+ajp13	8009/tcp	0.004642	# nvme-disc | Apache JServ Protocol 1.3 | NVMe over Fabrics Discovery Service
+xmpp	8010/tcp	0.002129	# XMPP File Transfer
+ftp-proxy	8021/tcp	0.000627	# intu-ec-client | Common FTP proxy port | Intuit Entitlement Client
+unknown	8031/tcp	0.002509
+http-proxy	8080/tcp	0.042052	# http-alt | Common HTTP proxy/second web server port | HTTP Alternate (see port 80)
+blackice-icecap	8081/tcp	0.006147	# sunproxyadmin | ICECap user console | Sun Proxy Admin Service
+blackice-alerts	8082/tcp	0.000878	# us-cli | BlackIce Alerts sent to this port | Utilistor (Client)
+us-srv	8083/tcp	0.000532	# Utilistor (Server)
+websnp	8084/tcp	0.000532	# Snarl Network Protocol over HTTP
+unknown	8085/tcp	0.000684
+d-s-n	8086/tcp	0.000380	# Distributed SCADA Networking Rendezvous Port
+simplifymedia	8087/tcp	0.000380	# Simplify Media SPP Protocol
+radan-http	8088/tcp	0.000608	# Radan HTTP
+unknown	8089/tcp	0.000760
+intermapper	8181/tcp	0.000380	# Intermapper network management system
+sophos	8192/tcp	0.000760	# spytechphone | Sophos Remote Management System | SpyTech Phone Service
+sophos	8193/tcp	0.000760	# Sophos Remote Management System
+sophos	8194/tcp	0.000760	# blp1 | Sophos Remote Management System | Bloomberg data API
+unknown	8222/tcp	0.000380
+unknown	8291/tcp	0.000456
+amberon	8301/tcp	0.000000	# Amberon PPC/PPS
+bitcoin	8333/tcp	0.000380	# Bitcoin crypto currency - https://en.bitcoin.it/wiki/Running_Bitcoin
+cvd	8400/tcp	0.000380
+abarsd	8402/tcp	0.000380
+https-alt	8443/tcp	0.009986	# pcsync-https | Common alternative https port | PCsync HTTPS
+asterix	8600/tcp	0.000380	# Surveillance Data
+unknown	8649/tcp	0.000380
+unknown	8651/tcp	0.000760
+unknown	8652/tcp	0.000760
+unknown	8701/tcp	0.000760
+sunwebadmin	8800/tcp	0.000228	# Sun Web Server Admin Service
+dxspider	8873/tcp	0.000380	# dxspider linking protocol
+sun-answerbook	8888/tcp	0.016522	# ddi-udp-1 | ddi-tcp-1 | Sun Answerbook HTTP server.  Or gnump3d streaming music server | NewsEDGE server TCP (TCP 1) | NewsEDGE server UDP (UDP 1)
+ospf-lite	8899/tcp	0.000608
+unknown	8994/tcp	0.000380
+cslistener	9000/tcp	0.002129
+tor-orport	9001/tcp	0.001216	# etlservicemgr | Tor ORPort | ETL Service Manager
+dynamid	9002/tcp	0.000380	# DynamID authentication
+unknown	9003/tcp	0.000228
+unknown	9004/tcp	0.000076
+golem	9005/tcp	0.000076	# Golem Inter-System RPC
+unknown 9006/tcp	0.000518   # unknown
+ogs-client	9007/tcp	0.000000	# Open Grid Services Client
+ogs-server	9008/tcp	0.000000	# Open Grid Services Server
+pichat	9009/tcp	0.000456	# Pichat Server
+sdr	9010/tcp	0.000380	# Secure Data Replicator Protocol
+d-star	9011/tcp	0.000380	# D-Star Routing digital voice+data for amateur radio
+unknown 9012/tcp	0.000518   # unknown
+unknown	9013/tcp	0.000076
+tor-socks	9050/tcp	0.000703	# versiera | Tor SocksPort, www.torproject.org | Versiera Agent Listener
+unknown	9071/tcp	0.000608
+glrpc	9080/tcp	0.000380	# Groove GLRPC
+cisco-aqos	9081/tcp	0.000228	# Required for Adaptive Quality of Service
+unknown 9082/tcp	0.000518   # unknown
+emc-pp-mgmtsvc	9083/tcp	0.000000	# EMC PowerPath Mgmt Service
+zeus-admin	9090/tcp	0.002747	# websm | Zeus admin server | WebSM
+xmltec-xmlmail	9091/tcp	0.000304
+XmlIpcRegSvc	9092/tcp	0.000000	# Xml-Ipc Server Reg
+copycat	9093/tcp	0.000000	# Copycat database replication service
+jetdirect	9100/tcp	0.003287	# pdl-datastream | hp-pdl-datastr | HP JetDirect card | PDL Data Streaming Port | Printer PDL Data Stream
+jetdirect	9101/tcp	0.000602	# bacula-dir | HP JetDirect card | Bacula Director
+jetdirect	9102/tcp	0.002133	# bacula-fd | HP JetDirect card. Also used (and officially registered for) Bacula File Daemon (an open source backup system) | Bacula File Daemon
+wap-wsp	9200/tcp	0.000228	# WAP connectionless session services | WAP connectionless session service
+wap-vcal-s	9207/tcp	0.000532	# WAP vCal Secure
+unknown	9220/tcp	0.000380
+unknown 9273/tcp	0.000518   # unknown
+unknown	9290/tcp	0.000380
+vrace	9300/tcp	0.000076	# Virtual Racing Service
+unknown	9415/tcp	0.000760
+unknown	9485/tcp	0.000380
+ismserver	9500/tcp	0.000380
+unknown	9502/tcp	0.000380
+unknown	9503/tcp	0.000380
+man	9535/tcp	0.000790	# mngsuite | Management Suite Remote Control
+cba8	9593/tcp	0.000760	# LANDesk Management Agent (cba8)
+msgsys	9594/tcp	0.000760	# Message System
+pds	9595/tcp	0.000760	# Ping Discovery System | Ping Discovery Service
+condor	9618/tcp	0.000380	# Condor Collector Service
+sd	9876/tcp	0.000602	# Session Director
+iua	9900/tcp	0.000380	# IUA
+unknown	9968/tcp	0.000380
+distinct32	9998/tcp	0.000304
+abyss	9999/tcp	0.004441	# Abyss web server remote web management interface | distinct
+snet-sensor-mgmt	10000/tcp	0.011692	# ndmp | SecureNet Pro Sensor https management server or apple airport admin | Network Data Management Protocol
+scp-config	10001/tcp	0.001292	# SCP Configuration
+documentum	10002/tcp	0.000380	# EMC-Documentum Content Server Product
+rxapi	10010/tcp	0.002889	# ooRexx rxapi services
+unknown	10012/tcp	0.000380
+unknown	10024/tcp	0.000380
+unknown	10025/tcp	0.000380
+amanda	10080/tcp	0.000000
+unknown	10243/tcp	0.000684
+unknown 10250/tcp	0.000518   # unknown
+unknown 10251/tcp	0.000518   # unknown
+apollo-relay	10252/tcp	0.000000	# Apollo Relay Port
+unknown 10256/tcp	0.000518   # unknown
+unknown 10257/tcp	0.000518   # unknown
+unknown 10259/tcp	0.000518   # unknown
+unknown	10566/tcp	0.000380
+unknown	10616/tcp	0.000380
+unknown	10617/tcp	0.000380
+unknown	10621/tcp	0.000380
+unknown	10626/tcp	0.000380
+unknown	10628/tcp	0.000380
+unknown	10629/tcp	0.000380
+sgi-soap	11110/tcp	0.000380	# Data migration facility (DMF) SOAP is a web server protocol to support remote access to DMF
+memcache	11211/tcp	0.000000	# Memory cache service
+sysinfo-sp	11967/tcp	0.000380	# SysInfo Service Protocol | SysInfo Sercice Protocol
+cce4x	12000/tcp	0.000427	# entextxid | ClearCommerce Engine 4.x (www.clearcommerce.com) | IBM Enterprise Extender SNA XID Exchange
+netbus	12345/tcp	0.000527	# italk | NetBus backdoor trojan or Trend Micro Office Scan | Italk Chat System
+unknown	13456/tcp	0.000380
+netbackup	13722/tcp	0.000314	# bpjava-msvc | bpjava-msvc   client | BP Java MSVC Protocol
+netbackup	13782/tcp	0.000728	# bpcd | bpcd          client | VERITAS NetBackup
+netbackup	13783/tcp	0.000389	# vopied | vopied        client | VOPIED Protocol
+scotty-ft	14000/tcp	0.000380	# SCOTTY High-Speed Filetransfer
+unknown	14238/tcp	0.000532
+unknown	14442/tcp	0.000380
+hydap	15000/tcp	0.001064	# Hypack Hydrographic Software Packages Data Acquisition | Hypack Data Aquisition
+onep-tls	15002/tcp	0.000380	# Open Network Environment TLS
+unknown	15003/tcp	0.000380
+bex-xr	15660/tcp	0.000380	# Backup Express Restore Server
+fmsascon	16001/tcp	0.000380	# Administration Server Connector
+unknown	16016/tcp	0.000380
+unknown	16018/tcp	0.000380
+amt-soap-http	16992/tcp	0.000760	# Intel(R) AMT SOAP/HTTP
+amt-soap-https	16993/tcp	0.000760	# Intel(R) AMT SOAP/HTTPS
+unknown	17988/tcp	0.000380
+unknown	19101/tcp	0.000380
+unknown	19801/tcp	0.000380
+unknown	19842/tcp	0.000380
+dnp	20000/tcp	0.000380
+btx	20005/tcp	0.000401	# openwebnet | xcept4 (Interacts with German Telekom's CEPT videotext service) | OpenWebNet protocol for electric network
+unknown	20031/tcp	0.000380
+unknown	20080/tcp	0.000076
+unknown	20221/tcp	0.000380
+ipulse-ics	20222/tcp	0.000380
+unknown	20828/tcp	0.000760
+unknown 21080/tcp	0.000518   # unknown
+unknown	21571/tcp	0.000380
+unknown	22939/tcp	0.000380
+unknown	23502/tcp	0.000760
+unknown	24800/tcp	0.000380
+unknown	25734/tcp	0.000380
+k3software-cli	26263/tcp	0.000000	# K3 Software-Client
+flexlm0	27000/tcp	0.000640	# FlexLM license manager additional ports
+unknown	27715/tcp	0.000380
+unknown	28201/tcp	0.000380
+ndmps	30000/tcp	0.000380	# Secure Network Data Management Protocol
+unknown	30718/tcp	0.000380
+unknown	31038/tcp	0.000380
+filenet-tms	32768/tcp	0.009199	# Filenet TMS
+filenet-rpc	32769/tcp	0.000760	# Filenet RPC
+sometimes-rpc3	32770/tcp	0.000903	# filenet-nch | Sometimes an RPC port on my Solaris box | Filenet NCH
+sometimes-rpc5	32771/tcp	0.001367	# filenet-rmi | Sometimes an RPC port on my Solaris box (rusersd) | FileNET RMI | FileNet RMI
+sometimes-rpc7	32772/tcp	0.000891	# filenet-pa | Sometimes an RPC port on my Solaris box (status) | FileNET Process Analyzer
+sometimes-rpc9	32773/tcp	0.000602	# filenet-cm | Sometimes an RPC port on my Solaris box (rquotad) | FileNET Component Manager
+sometimes-rpc11	32774/tcp	0.000602	# filenet-re | Sometimes an RPC port on my Solaris box (rusersd) | FileNET Rules Engine
+sometimes-rpc13	32775/tcp	0.000427	# filenet-pch | Sometimes an RPC port on my Solaris box (status) | Performance Clearinghouse
+sometimes-rpc15	32776/tcp	0.000364	# filenet-peior | Sometimes an RPC port on my Solaris box (sprayd) | FileNET BPM IOR
+unknown	32781/tcp	0.000380
+unknown	32782/tcp	0.000380
+unknown	33354/tcp	0.000760
+unknown	33899/tcp	0.000380
+unknown	34571/tcp	0.000380
+unknown	34572/tcp	0.000380
+unknown	34573/tcp	0.000380
+unknown	35500/tcp	0.000760
+unknown 39191/tc	0.000518   # unknown
+unknown	40193/tcp	0.000380
+caerpc	42510/tcp	0.000988	# CA eTrust RPC
+unknown	45100/tcp	0.000684
+unknown	48080/tcp	0.000380
+unknown	49152/tcp	0.007907
+unknown	49153/tcp	0.006158
+unknown	49154/tcp	0.006767
+unknown	49155/tcp	0.005702
+unknown	49156/tcp	0.005322
+unknown	49157/tcp	0.003573
+unknown	49158/tcp	0.000380
+unknown	49159/tcp	0.000380
+unknown	49160/tcp	0.000380
+unknown	49999/tcp	0.000684
+ibm-db2	50000/tcp	0.001317	# (also Internet/Intranet Input Method Server Framework?)
+unknown	50001/tcp	0.000836
+iiimsf	50002/tcp	0.000351	# Internet/Intranet Input Method Server Framework
+unknown	50003/tcp	0.000380
+unknown	50006/tcp	0.000380
+unknown	50800/tcp	0.000380
+unknown	51103/tcp	0.000684
+unknown	52822/tcp	0.000456
+unknown	52869/tcp	0.000760
+unknown	55555/tcp	0.000760
+unknown	55600/tcp	0.000760
+unknown 56791/tcp	0.000518   # unknown
+unknown	57294/tcp	0.000380
+unknown	58080/tcp	0.000380
+unknown	60020/tcp	0.000380
+unknown	63331/tcp	0.000380
+unknown	64623/tcp	0.000760
+unknown	64680/tcp	0.000760
+unknown	65000/tcp	0.000760
+unknown	65129/tcp	0.000380
+unknown	65389/tcp	0.000760
+unknown 65535/tcp	0.000518   # unknown
