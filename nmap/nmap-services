@@ -1,3 +1,12 @@
+##########################################################################
+#
+# Top 600 ports plus others commonly found (kube, docker, etc..)
+#
+# Ref: https://nmap.org/book/nmap-services.html
+#
+# grep '/tcp' /usr/local/share/nmap/nmap-services | sort -r -k3 | head -600
+#
+##########################################################################
 discard	9/tcp	0.003764	# sink null
 daytime	13/tcp	0.003927
 qotd	17/tcp	0.002346	# Quote of the Day
@@ -66,8 +75,8 @@ kpasswd5	464/tcp	0.001192	# Kerberos (v5) | kpasswd
 smtps	465/tcp	0.013888	# submissions | igmpv3lite | urd | smtp protocol over TLS/SSL (was ssmtp) | URL Rendesvous Directory for SSM | IGMP over UDP for SSM | URL Rendezvous Directory for SSM | Message Submission over TLS protocol
 retrospect	497/tcp	0.001179	# Retrospect backup and restore service
 isakmp	500/tcp	0.001129
-exec	512/tcp	0.000841	# biff | comsat | BSD rexecd(8) | remote process execution; authentication performed using passwords and UNIX login names | used by mail system to notify users of new mail received; currently receives messages only from processes on the same machine
-login	513/tcp	0.005595	# who | BSD rlogind(8) | remote login a la telnet; automatic authentication performed based on priviledged port numbers and distributed data bases which identify "authentication domains" | maintains data bases showing who's logged in to machines on a local net and the load average of the machine
+exec	512/tcp	0.000841	# biff | comsat | BSD rexecd(8) | remote process execution; authentication performed using passwords and UNIX login names | used by mail system to notify users of new mail received
+login	513/tcp	0.005595	# who | BSD rlogind(8) | remote login a la telnet; automatic authentication performed based on priviledged port numbers and distributed data bases which identify "authentication domains"
 shell	514/tcp	0.011078	# syslog | BSD rshd(8) | cmd like exec, but automatic authentication is performed as for login server
 printer	515/tcp	0.007214	# spooler (lpd) | spooler
 uucp-rlogin	541/tcp	0.000489
@@ -348,8 +357,8 @@ onpsocket	5014/tcp	0.000076	# Overlay Network Protocol
 fmwp	5015/tcp	0.000076	# FileMaker, Inc. - Web publishing
 unknown	5016/tcp	0.000076
 unknown	5017/tcp	0.000076
-unknown 5018/tcp	0.000518   # unknown
-unknown 5019/tcp	0.000518   # unknown
+unknown	5018/tcp	0.000518	# unknown
+unknown	5019/tcp	0.000518	# unknown
 zenginkyo-1	5020/tcp	0.000076
 zenginkyo-2	5021/tcp	0.000076
 mice	5022/tcp	0.000000	# mice server
@@ -365,13 +374,13 @@ dmp	5031/tcp	0.000000	# Direct Message Protocol
 signacert-agent	5032/tcp	0.000000	# SignaCert Enterprise Trust Server Agent
 jtnetd-server	5033/tcp	0.000228	# Janstor Secure Data
 jtnetd-status	5034/tcp	0.000000	# Janstor Status
-unknown 5035/tcp	0.000518   # unknown
-unknown 5036/tcp	0.000518   # unknown
-unknown 5037/tcp	0.000518   # unknown
-unknown 5038/tcp	0.000518   # unknown
-unknown 5039/tcp	0.000518   # unknown
+unknown	5035/tcp	0.000518	# unknown
+unknown	5036/tcp	0.000518	# unknown
+unknown	5037/tcp	0.000518	# unknown
+unknown	5038/tcp	0.000518	# unknown
+unknown	5039/tcp	0.000518	# unknown
 unknown	5040/tcp	0.000152
-unknown   5041/tcp     0.000518   # unknown
+unknown	5041/tcp	0.000518	# unknown
 asnaacceler8db	5042/tcp	0.000000
 swxadmin	5043/tcp	0.000000	# ShopWorX Administration
 lxi-evntsvc	5044/tcp	0.000000	# LXI Event Service
@@ -461,15 +470,15 @@ afs3-prserver	7002/tcp	0.000351	# users & groups database
 afs3-bos	7007/tcp	0.000314	# basic overseer process
 doceri-ctl	7019/tcp	0.000836	# doceri-view | doceri drawing service control | doceri drawing service screen view
 realserver	7070/tcp	0.004328	# arcp | ARCP
-unknown 7081/tcp	0.000518   # unknown
-unknown 7082/tcp	0.000518   # unknown
+unknown	7081/tcp	0.000518	# unknown
+unknown	7082/tcp	0.000518	# unknown
 font-service	7100/tcp	0.000928	# X Font Service
 unknown	7106/tcp	0.000380
 fodms	7200/tcp	0.000439	# FODMS FLIP
 unknown	7625/tcp	0.000380
 soap-http	7627/tcp	0.000380	# SOAP Service Port
-unknown 7695/tcp	0.000518   # unknown
-unknown 7696/tcp	0.000518   # unknown
+unknown	7695/tcp	0.000518	# unknown
+unknown	7696/tcp	0.000518	# unknown
 scriptview	7741/tcp	0.000380	# ScriptView Network
 cbt	7777/tcp	0.000380
 interwise	7778/tcp	0.000380
@@ -498,6 +507,7 @@ d-s-n	8086/tcp	0.000380	# Distributed SCADA Networking Rendezvous Port
 simplifymedia	8087/tcp	0.000380	# Simplify Media SPP Protocol
 radan-http	8088/tcp	0.000608	# Radan HTTP
 unknown	8089/tcp	0.000760
+unknown	8092/tcp	0.000760	# unknown 
 intermapper	8181/tcp	0.000380	# Intermapper network management system
 sophos	8192/tcp	0.000760	# spytechphone | Sophos Remote Management System | SpyTech Phone Service
 sophos	8193/tcp	0.000760	# Sophos Remote Management System
@@ -525,19 +535,19 @@ dynamid	9002/tcp	0.000380	# DynamID authentication
 unknown	9003/tcp	0.000228
 unknown	9004/tcp	0.000076
 golem	9005/tcp	0.000076	# Golem Inter-System RPC
-unknown 9006/tcp	0.000518   # unknown
+unknown	9006/tcp	0.000518	# unknown
 ogs-client	9007/tcp	0.000000	# Open Grid Services Client
 ogs-server	9008/tcp	0.000000	# Open Grid Services Server
 pichat	9009/tcp	0.000456	# Pichat Server
 sdr	9010/tcp	0.000380	# Secure Data Replicator Protocol
 d-star	9011/tcp	0.000380	# D-Star Routing digital voice+data for amateur radio
-unknown 9012/tcp	0.000518   # unknown
+unknown	9012/tcp	0.000518	# unknown
 unknown	9013/tcp	0.000076
 tor-socks	9050/tcp	0.000703	# versiera | Tor SocksPort, www.torproject.org | Versiera Agent Listener
 unknown	9071/tcp	0.000608
 glrpc	9080/tcp	0.000380	# Groove GLRPC
 cisco-aqos	9081/tcp	0.000228	# Required for Adaptive Quality of Service
-unknown 9082/tcp	0.000518   # unknown
+unknown	9082/tcp	0.000518	# unknown
 emc-pp-mgmtsvc	9083/tcp	0.000000	# EMC PowerPath Mgmt Service
 zeus-admin	9090/tcp	0.002747	# websm | Zeus admin server | WebSM
 xmltec-xmlmail	9091/tcp	0.000304
@@ -549,7 +559,7 @@ jetdirect	9102/tcp	0.002133	# bacula-fd | HP JetDirect card. Also used (and offi
 wap-wsp	9200/tcp	0.000228	# WAP connectionless session services | WAP connectionless session service
 wap-vcal-s	9207/tcp	0.000532	# WAP vCal Secure
 unknown	9220/tcp	0.000380
-unknown 9273/tcp	0.000518   # unknown
+unknown	9273/tcp	0.000518	# unknown
 unknown	9290/tcp	0.000380
 vrace	9300/tcp	0.000076	# Virtual Racing Service
 unknown	9415/tcp	0.000760
@@ -576,12 +586,12 @@ unknown	10024/tcp	0.000380
 unknown	10025/tcp	0.000380
 amanda	10080/tcp	0.000000
 unknown	10243/tcp	0.000684
-unknown 10250/tcp	0.000518   # unknown
-unknown 10251/tcp	0.000518   # unknown
+unknown	10250/tcp	0.000518	# unknown
+unknown	10251/tcp	0.000518	# unknown
 apollo-relay	10252/tcp	0.000000	# Apollo Relay Port
-unknown 10256/tcp	0.000518   # unknown
-unknown 10257/tcp	0.000518   # unknown
-unknown 10259/tcp	0.000518   # unknown
+unknown	10256/tcp	0.000518	# unknown
+unknown	10257/tcp	0.000518	# unknown
+unknown	10259/tcp	0.000518	# unknown
 unknown	10566/tcp	0.000380
 unknown	10616/tcp	0.000380
 unknown	10617/tcp	0.000380
@@ -621,7 +631,7 @@ unknown	20080/tcp	0.000076
 unknown	20221/tcp	0.000380
 ipulse-ics	20222/tcp	0.000380
 unknown	20828/tcp	0.000760
-unknown 21080/tcp	0.000518   # unknown
+unknown	21080/tcp	0.000518	# unknown
 unknown	21571/tcp	0.000380
 unknown	22939/tcp	0.000380
 unknown	23502/tcp	0.000760
@@ -651,7 +661,7 @@ unknown	34571/tcp	0.000380
 unknown	34572/tcp	0.000380
 unknown	34573/tcp	0.000380
 unknown	35500/tcp	0.000760
-unknown 39191/tc	0.000518   # unknown
+unknown	39191/tc	0.000518	# unknown
 unknown	40193/tcp	0.000380
 caerpc	42510/tcp	0.000988	# CA eTrust RPC
 unknown	45100/tcp	0.000684
@@ -677,7 +687,7 @@ unknown	52822/tcp	0.000456
 unknown	52869/tcp	0.000760
 unknown	55555/tcp	0.000760
 unknown	55600/tcp	0.000760
-unknown 56791/tcp	0.000518   # unknown
+unknown	56791/tcp	0.000518	# unknown
 unknown	57294/tcp	0.000380
 unknown	58080/tcp	0.000380
 unknown	60020/tcp	0.000380
@@ -687,4 +697,4 @@ unknown	64680/tcp	0.000760
 unknown	65000/tcp	0.000760
 unknown	65129/tcp	0.000380
 unknown	65389/tcp	0.000760
-unknown 65535/tcp	0.000518   # unknown
+unknown	65535/tcp	0.000518	# unknown
