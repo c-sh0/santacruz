@@ -6,7 +6,7 @@
 # 05/11/22
 #
 #################
-# Help Function #
+# Help function #
 #################
 show_help() {
 cat << _EOF_
@@ -24,23 +24,32 @@ exit 0
 }
 
 #################
-# Date Function #
+# Date function #
 #################
 mkdate() {
 	_dtype=${1}
 
 	if [ "${_dtype}" == 'dt' ]; then
-		local _d=`date +"%Y-%m-%d %T.%3N (%Z)"`
+		local _d=`date +"%Y-%m-%d %T.%3N"`
 
-	elif [ "${_dtype}" == 'd' ]; then
-		local _d=`date +"%Y-%m-%d"`
+	elif [ "${_dtype}" == 'today' ]; then
+		local _d=`date +"%m%d%Y"`
 	fi
 
 	echo "${_d}"
 }
+_today="$(mkdate "today")"
+
+####################
+# Log msg function #
+####################
+wr_mesg() {
+	_msg=${1}
+	echo "[$(mkdate "dt")]: ${_msg}"
+}
 
 ######################
-# Parseargs Function #
+# Parseargs function #
 ######################
 _rundir=''
 _targetsf=''
@@ -90,186 +99,224 @@ parse_args "$@"
 ###########
 # Globals #
 ###########
-_scandate="$(mkdate "d")"
 _datadir="${_rundir}/data"
 _confdir="${_rundir}/conf"
 _scriptdir="${_rundir}/scripts"
-_nsedir="${_rundir}/nmap/nse"
-_nucleitpldir="${_datadir}/nuclei-templates"
-_nucleidir="${_datadir}/nuclei"
-_nmapdir="${_datadir}/nmap"
+_logdir="${_datadir}/logs"
+_configf="${_confdir}/santacruz.yml"
+
+# nmap
+_nmap_bin='/usr/local/bin/nmap'
+_nmap_rundir="${_rundir}/nmap"
+_nmap_logdir="${_logdir}/nmap"
 _nmap2es="${_scriptdir}/nmap2es.py"
 _nmapparse="${_scriptdir}/nmapparse.py"
-_httpxnse="${_nsedir}/httpx.nse"
-#
-_conffile="${_confdir}/santacruz.yml"
-_nucleiconf="${_confdir}/nuclei.yml"
-_dscan_xml="${_nmapdir}/dsicovery_scan-${_scandate}.xml"
-_pscan_xml="${_nmapdir}/port_scan-${_scandate}.xml"
-_pscan_targets="${_nmapdir}/port_scan-${_scandate}.targets"
-_nuclei_targets="${_nucleidir}/nuclei-${_scandate}.targets"
-#
-_nmap='/usr/local/bin/nmap'
-_httpx='/usr/local/bin/httpx'
+
+# httpx
+_httpx_bin='/usr/local/bin/httpx'
+_httpx_logdir="${_logdir}/httpx"
+
+# nuclei
 _nuclei='/usr/local/bin/nuclei'
+_nuclei_conf="${_confdir}/nuclei.yml"
+_nuclei_logdir="${_logdir}/nuclei"
+_nuclei_tpldir="${_datadir}/nuclei-templates"
 
 
 #####################
 # Pre-scan function #
 #####################
 pre_scan() {
-	# check for nuclei templates dir, (git checkout if it does not exist)
-	if [ ! -d ${_nucleitpldir} ]; then
-		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: git clone https://github.com/projectdiscovery/nuclei-templates.git"
-		_gitcmd=`which git`
-		if [ ! -e ${_gitcmd} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: 'git', command not found"
-			exit -255
-		fi
-		${_gitcmd} clone https://github.com/projectdiscovery/nuclei-templates.git ${_nucleitpldir}
-	fi
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] - start"
 
-	chk_dirs=(${_datadir} ${_confdir} ${_scriptdir} ${_nsedir} ${_nucleitpldir})
+	# check directories
+	chk_dirs=(${_datadir} ${_confdir} ${_scriptdir} ${_nmap_rundir} ${_nuclei_tpldir})
 	for _dir in "${chk_dirs[@]}"; do
 		if [ ! -d ${_dir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_dir})"
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - directory does not exist, ${_dir}"
 			exit -255
 		fi
 	done
 
 	# check files
-	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_conffile} ${_nucleiconf})
+	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_configf} ${_nucleiconf})
 	for _file in "${chk_files[@]}"; do
 		if [ ! -f ${_file} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such file, (${_file})"
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - file does not exist, ${_file}"
 			exit -255
 		fi
 	done
 
 	# check for tool installation
-	tools=(${_nmap} ${_httpx} ${_nuclei})
+	tools=(${_nmap_bin} ${_httpx_bin} ${_nuclei})
 	for tool in "${tools[@]}"; do
 		if [ ! -f ${tool} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such file, (${_file})"
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - file does not exist, ${_file}"
 			exit -255
 		fi
 	done
 
-	# create nmap output dir if not exist
-	if [ ! -d ${_nmapdir} ]; then
-		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: mkdir -p ${_nmapdir}"
-		mkdir -p -m 700 ${_nmapdir}
-		if [ ! -d ${_nmapdir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_nmapdir})"
-			exit -255
-		fi
-	fi
-
-	# create nuclei output dir if not exist
-	if [ ! -d ${_nucleidir} ]; then
-		echo "[$(mkdate "dt")]: ${FUNCNAME[0]} [CMD]: mkdir -p ${_nucleidir}"
-		mkdir -p -m 700 ${_nucleidir}
-		if [ ! -d ${_nucleidir} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [ERROR]: No such directory, (${_nucleidir})"
-			exit -255
-		fi
-	fi
-
-	# check for exsiting output files
-	chk_files=(${_dscan_xml} ${_pscan_xml} ${_pscan_targets} ${_nuclei_targets})
-	for _file in "${chk_files[@]}"; do
-		if [ -f ${_file} ]; then
-			echo "[$(mkdate "dt")] ${FUNCNAME[0]} [WARN]: Found ${_file}, Scan already running?, exit()"
-			exit -255
+	# create log directories if not exist
+	log_dirs=(${_logdir} ${_nmap_logdir} ${_httpx_logdir} ${_nuclei_logdir})
+	for _dir in "${log_dirs[@]}"; do
+		if [ ! -d ${_dir} ]; then
+			wr_mesg "[CMD]: ${FUNCNAME[0]}():${LINENO} - creating directory, ${_dir}"
+			mkdir -p -m 700 ${_dir}
+			if [ ! -d ${_dir} ]; then
+				wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - unable to create directory, ${_dir}"
+				exit -255
+			fi
 		fi
 	done
+
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] - end"
 }
 
 #################
 # Scan function #
 #################
 run_scan() {
-	###############
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] - start"
+
+	#------------------------------------------------------------------------------------#
+	# targets/log file vars
+	#------------------------------------------------------------------------------------#
+	_dscan_log="${_nmap_logdir}/dsicovery_scan-${_today}.xml"
+	_pscan_log="${_nmap_logdir}/port_scan-${_today}.xml"
+	_httpx_log="${_httpx_logdir}/httpx_scan.${_today}.json"
+
+	_nmap_excludef="${_datadir}/nmap-excludes.db"
+	_nmap_exclude_tmp="${_datadir}/exclude.$RANDOM$$.${_today}.tmp"
+
+	_nmap_targets="${_nmap_logdir}/nmap-${_today}.targets"
+	_nuclei_targets="${_nuclei_logdir}/nuclei-${_today}.targets"
+	_httpx_targets="${_httpx_logdir}/httpx-${_today}.targets"
+
+
+	# check for exsiting output files
+	chk_files=(${_dscan_log} ${_pscan_log} ${_nmap_targets} ${_httpx_log} ${_httpx_targets})
+	for _file in "${chk_files[@]}"; do
+		if [ -f ${_file} ]; then
+			wr_mesg "[WARN] ${FUNCNAME[0]}():${LINENO} - ${_file} found, Scan already running?, exit()"
+			exit -255
+		fi
+	done
+
+	# create nmap excludes file if not exist
+	if [ ! -f ${_nmap_excludef} ]; then
+		wr_mesg "[CMD] ${FUNCNAME[0]}():${LINENO} - creating, ${_nmap_excludef}"
+		touch ${_nmap_excludef}
+
+		if [ ! -f ${_nmap_excludef} ]; then
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - file does not exist, ${_nmap_excludef}"
+			exit -255
+		fi
+	fi
+
+	#------------------------------------------------------------------------------------#
 	# Nmap notes:
-	# * Latest version of nmap (from source): Nmap now writes filtered ports into the XML files
-	#   this can result in HUGE log files when doing full port scans on a lot of hosts
-	#   See: https://github.com/nmap/nmap/commit/38671f22259f87f564403dc6e91c1e4216fdb978
+	#------------------------------------------------------------------------------------#
+	# * Latest version of nmap (from source): Nmap now writes filtered ports into the
+	#   XML files this could result in large XML logs files when doing full port scans
+	#   on a lot of hosts.
+	#   See:
+	#     https://github.com/nmap/nmap/commit/38671f22259f87f564403dc6e91c1e4216fdb978
+	#     https://github.com/nmap/nmap/issues/2478
+	#
 	#   To disable this, comment out line 605 in output.cc and recompile:
-	#       output.cc:605    //output_rangelist_given_ports(LOG_XML, currentr->ports, currentr->count);
+	#       output.cc:605
+	#           //output_rangelist_given_ports(LOG_XML, currentr->ports, currentr->count);
+	#
 	# * Silent option -v0
 	#   https://github.com/nmap/nmap/pull/265
-	###############
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: START"
-
 	#------------------------------------------------------------------------------------#
-	# Nmap discovery scan
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap discovery scan, Starting..."
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Logfile (${_dscan_xml})"
+	# Nmap discovery scan (Phase 00)
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - discovery_scan, started ..."
 
-		${_nmap} \
+		${_nmap_bin} \
 			-v0 -n -sn \
-			-PS21-23,25,53,80,110-111,135,139,143,161,443,445,993,995,1723,3306,3389,5900,8080 \
+			-PS21-23,25,53,80,110-111,135,139,143,161,443,445,587,993,995,1025,1723,3306,3389,5666,5900,8080,8443,9090 \
 			-PU53,67-69,111,123,135,137-139,161-162,445,500,514,520,631,1434,1900,4500,5353,49152 \
-			--min-parallelism 100 --min-hostgroup 100 --min-rate 20000 --randomize-hosts --disable-arp-ping --max-retries 2 \
-		-iL ${_targetsf} -oX ${_dscan_xml} > /dev/null
+			--min-parallelism 32 --min-rate 10000 --randomize-hosts --disable-arp-ping --max-retries 4 \
+		-iL ${_targetsf} --excludefile ${_nmap_excludef} -oX ${_dscan_log} > /dev/null
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap discovery scan, Complete"
+	 wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - discovery_scan, completed (log: ${_dscan_log})"
 
+	#------------------------------------------------------------------------------------#
 	# Create port scan targets file
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Create port scan targets (${_pscan_targets})"
-	${_nmapparse} --file ${_dscan_xml} --data-type ip > ${_pscan_targets}
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - port_scan, creating targets file: ${_nmap_targets}"
+	${_nmapparse} --file ${_dscan_log} --output ip > ${_nmap_targets}
+
 
 	#------------------------------------------------------------------------------------#
-	# Nmap port scan (full port scan)
+	# Nmap port discovery scan (Phase 01)
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap port scan, Starting..."
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Logfile (${_pscan_xml})"
+	# Use custom nmap-services file for default port scanning. (--datadir)
+	# https://nmap.org/book/nmap-services.html
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - port_scan, started ..."
 
-		${_nmap} \
-			-v0 -sS -p- --open \
-			--script=${_nsedir}/ --script-timeout=5 \
-			--min-parallelism 100 --min-hostgroup 100 --host-timeout 10m --randomize-hosts \
-		-iL ${_pscan_targets} -oX ${_pscan_xml} > /dev/null
+		${_nmap_bin} -v0 -sS --open --datadir ${_nmap_rundir} \
+			--min-parallelism 64 --min-hostgroup 256 --min-rate 10000 --defeat-rst-ratelimit --host-timeout 10m --randomize-hosts \
+		-iL ${_nmap_targets} --excludefile ${_nmap_excludef} -oX ${_pscan_log} > /dev/null
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nmap port scan, Complete"
-
-	# Create nuclei targets file (nmap httpx.nse results)
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Create nuclei targets (${_nuclei_targets})"
-	${_nmapparse} --file ${_pscan_xml} --data-type httpx > ${_nuclei_targets}
+	 wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - port_scan, completed (log: ${_pscan_log})"
 
 	#------------------------------------------------------------------------------------#
-	# Nuclei scan (sends data to elasticsearch)
+	# Ferret out hosts with an IDS and exclude them from future scans. If the report
+	# shows hosts with 100 or more ports as open, This is a pretty good indication that
+	# there is a security mechanism in place for that host.
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nuclei scan, Starting..."
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] - excluding hosts with open ports >= 100"
+	${_nmapparse} --file ${_pscan_log} --output pcount -gt 50 | cut -d, -f2 | sort -t. -k3,3n -k4,4n > ${_nmap_exclude_tmp}
 
-	# Download latest nuclei templates
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Updating ${_nucleitpldir}..."
-	_gitcmd=`which git`
-	pushd `pwd`
-	cd ${_nucleitpldir}/ && ${_gitcmd} pull
-	popd
-
-	 ${_nuclei} -silent -no-color -disable-update-check -max-redirects 3 \
-		-report-config ${_conffile} -list ${_nuclei_targets} \
-		-templates ${_nucleitpldir} -config ${_nucleiconf}
-
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Nuclei scan, Complete"
+	for _ip_addr in `cat ${_nmap_exclude_tmp}`; do
+		_found=`grep -c -w ${_ip_addr} ${_nmap_excludef}`
+		if [ ${_found} -eq 0 ]; then
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] - adding ${_ip_addr} to ${_nmap_excludef}"
+			echo "${_ip_addr}" >> ${_nmap_excludef}
+		fi
+	done
+	# delete tmp file
+	rm -f ${_nmap_exclude_tmp}
 
 	#------------------------------------------------------------------------------------#
-	# Scan completed, send nmap logs to elasticsearch
-	# Note: Sacn times are saved in the log files, we can import this data at any time
+	# httpx scan (Phase 02)
 	#------------------------------------------------------------------------------------#
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Sending nmap logs to elasticsearch..."
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: nmap2es: ${_dscan_xml}"
-	${_nmap2es} -c ${_conffile} -t discovery -f ${_dscan_xml}
+	# Parse nmap port scan results, find ports running http services
+	# --skip-gt (Skip hosts who report >= 100 open ports, chances are that there is a
+	# security mechanism in place for that host)
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] - httpx_scan, creating targets file: ${_httpx_targets}"
+	${_nmapparse} --file ${_pscan_log} --output httpx --skip-gt 100 > ${_httpx_targets}
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: nmap2es: ${_pscan_xml}"
-	${_nmap2es} -c ${_conffile} -t portscan -f ${_pscan_xml}
+	#------------------------------------------------------------------------------------#
+	# Note: Golang is set to depricate unsupported tls versions in furture release.
+	# see this discussion:
+	# https://github.com/projectdiscovery/httpx/discussions/633
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] - httpx_scan, started ..."
+	export GODEBUG=tls10default=1
+	${_httpx_bin} -silent -nc -sc -td -tls-grab -title -fhr -ec -asn -maxr 5 -location -web-server -timeout 3 -list ${_httpx_targets} -json > ${_httpx_log}
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: Complete"
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] - httpx_scan, completed (log: ${_httpx_log})"
 
-	echo "[$(mkdate "dt")] ${FUNCNAME[0]}() [INFO]: END"
+	#------------------------------------------------------------------------------------#
+	# Create nuclei targets from httpx results
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NUCLEI] - nuclei_scan, creating targets file: ${_nuclei_targets}"
+	cat ${_httpx_log} | jq '.url' | sed -e 's/"//g' > ${_nuclei_targets}
+
+
+	#------------------------------------------------------------------------------------#
+	# Nuclei scan (Phase 03)
+	#------------------------------------------------------------------------------------#
+	#------------------------------------------------------------------------------------#
+
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] - end"
 }
 
 #############
