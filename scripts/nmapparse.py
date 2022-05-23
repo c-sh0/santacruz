@@ -53,13 +53,7 @@ def do_parse(xml,args):
 
                 # http(s)
                 for port in data['ports']:
-                    if port == '443':
-                       print(f"https://{data['ip_addr']}")
-                    elif port == '80':
-                       print(f"http://{data['ip_addr']}")
-                    else:
-                       print(f"http://{data['ip_addr']}:{port}")
-                       print(f"https://{data['ip_addr']}:{port}")
+                    print(f"{data['ip_addr']}:{port}")
 
                 #ports_list = ",".join(data['ports'])
                 #print(f"-p {ports_list} <<< {data['ip_addr']}")
