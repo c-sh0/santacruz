@@ -160,7 +160,7 @@ pre_scan() {
 	log_dirs=(${_logdir} ${_nmap_logdir} ${_httpx_logdir} ${_nuclei_logdir})
 	for _dir in "${log_dirs[@]}"; do
 		if [ ! -d ${_dir} ]; then
-			wr_mesg "[CMD]: ${FUNCNAME[0]}():${LINENO} - creating directory, ${_dir}"
+			wr_mesg "${FUNCNAME[0]}():${LINENO}, [CMD] - creating directory, ${_dir}"
 			mkdir -p -m 700 ${_dir}
 			if [ ! -d ${_dir} ]; then
 				wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - unable to create directory, ${_dir}"
@@ -204,7 +204,7 @@ run_scan() {
 
 	# create nmap excludes file if not exist
 	if [ ! -f ${_nmap_excludef} ]; then
-		wr_mesg "[CMD] ${FUNCNAME[0]}():${LINENO} - creating, ${_nmap_excludef}"
+		wr_mesg "${FUNCNAME[0]}():${LINENO}, [CMD] - creating, ${_nmap_excludef}"
 		touch ${_nmap_excludef}
 
 		if [ ! -f ${_nmap_excludef} ]; then
