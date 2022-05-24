@@ -64,6 +64,28 @@ def p_results(es_idx,data,out):
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t{h_state}\t{as_prefix}\t{asn}\t{as_handle}\t{as_name}\t{as_cc}\t{as_source}")
 
+        elif es_idx == 'httpx':
+                tlsns   = ''
+                ts      = ts.split('.', 1)[0] # clean timstamp
+                url     = d['event']['url']
+                ws      = d['event']['webserver']
+                pt      = d['event']['page_title']
+                sc      = d['event']['status-code']
+                as_name = d['event']['asn_name']
+
+                if 'tls' in d['event']:
+                   if 'dns_names' in d['event']['tls']:
+                       if len(d['event']['tls']['dns_names']):
+                           tlsns = d['event']['tls']['dns_names'][0]
+
+                   if 'version' in d['event']['tls']:
+                       tlsv = d['event']['tls']['version']
+
+                if out =='csv':
+                   print(f"{es_idx},{ts},{sev},{url},{sc}{tlsv},{ws},{tlsns},{as_name},{pt}")
+                else:
+                   print(f"{es_idx}: {ts}\t{sev}\t{url}\t{sc}\t{tlsv}\t{ws}\t{tlsns}\t{as_name}\t{pt}")
+
         elif es_idx == 'nuclei':
                 match_at = d['event']['matched-at']
                 tid = d['event']['template-id']
@@ -103,8 +125,11 @@ def do_Search(ctx):
 
         if len(r.json()):
            data = r.json()['hits']['hits']
+
+           # json dump
            if ctx['oformat'] == 'json':
               print(json.dumps(data))
+
            else:
               p_results(idx,data,ctx['oformat'])
 
@@ -122,28 +147,42 @@ def bld_ESquery(ctx):
             },
             "_source": {
                  "includes": [
+                       # common (all)
                        "@timestamp",
                        "event.ip",
-                       "event.hostname",
                        "event.host",
                        "event.port",
                        "event.protocol",
+                       "event.info.name",
+                       "event.info.severity",
+                       # httpx
+                       "event.url",
+                       "event.status-code",
+                       "event.jarm",
+                       "event.method",
+                       "event.page_title",
+                       "event.webserver",
+                       "event.tls.version",
+                       "event.hashes",
+                       "event.tls.dns_names",
+                       # nmap port scan
+                       "event.hostname",
                        "event.state",
                        "event.script",
                        "event.script_output",
-                       "event.info.severity",
-                       "event.info.name",
+                       # nuclei
                        "event.matched-at",
                        "event.matcher-name",
                        "event.template-id",
+                       "event.info.classification.cve-id",
+                       "event.info.classification.cvss-score",
+                       # common (other)
                        "event.asn",
                        "event.asn_cc",
                        "event.asn_handle",
                        "event.asn_name",
                        "event.asn_prefix",
                        "event.asn_source",
-                       "event.info.classification.cve-id",
-                       "event.info.classification.cvss-score"
                  ]
             },
             "size": ctx['lsize'],
@@ -153,9 +192,8 @@ def bld_ESquery(ctx):
     if ctx['ip_addr']:
        es_query['query']['bool']['must'] = [{"match": {"event.ip": ctx['ip_addr']}}]
 
-    if ctx['oformat'] == 'httpx':
-       es_query['query']['bool']['must'].append({"match": {"event.script": "httpx"}})
-       es_query['query']['bool']['filter'].append({"exists": {"field": "event.script_output"}})
+    #es_query['query']['bool']['must'].append({"match": {"event.script": "httpx"}})
+    #es_query['query']['bool']['filter'].append({"exists": {"field": "event.script_output"}})
 
     if ctx['verbose']:
        print(f"[VERBOSE]: Elasticsearch Query:  {json.dumps(es_query)}")
@@ -243,7 +281,7 @@ def main():
     parser.add_argument('-s','--start', help='[datetime]\t:- Search from start datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='', action='store')
     parser.add_argument('-e','--end', help='[datetime]\t:- Search to end datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now)', default="now", dest='end', metavar='', action='store')
     parser.add_argument('-n','--num', help='[num]\t\t:- Limit number of results (default: 100)', default=100, dest='num', metavar='', action='store', type=int)
-    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json,httpx] (default: tab)', default="tab", dest='output', metavar='', action='store')
+    parser.add_argument('-o','--output', help='[format]\t:- Output format [tab,csv,json] (default: tab)', default="tab", dest='output', metavar='', action='store')
     parser.add_argument('-l','--list', help='[list]\t:- List Elasticsearch Indices', action='store_true')
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action="store_true")
     cmdargs = parser.parse_args()
