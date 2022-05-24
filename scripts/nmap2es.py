@@ -279,10 +279,10 @@ def init_ESSession(user,passwd,api_URL,verbose):
     return session
 
 def main():
-    parser = argparse.ArgumentParser(description='Import nmap XML output into Elasticsearch')
+    parser = argparse.ArgumentParser(description='Import scan logs into Elasticsearch')
     parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-f','--file', help='[file]\t:- Path to Nmap XML report file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-t','--type', help='[report type]\t:- Nmap report type [portscan|discovery]', dest='type', metavar='', required=True)
+    parser.add_argument('-f','--file', help='[file]\t:- Path to scan log file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-t','--type', help='[report type]\t:- Scan log type [portscan|discovery|httpx]', dest='type', metavar='', required=True)
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action='store_true')
 
     opt_args = parser.parse_args()
