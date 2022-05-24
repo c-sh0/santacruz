@@ -161,9 +161,9 @@ def httpx_ScanToEs(json_data,ES_session,api_url,verbose):
         es_data = set_dict('Httpx Discovery Scan','info',['httpx','discovery','network'])
         data    = json.loads(log_line)
 
-       # Q: Why not just send the httpx json data as is?
-       # A: I wanted to stay consistent with nuclei's "auto" ES import
-       # and not have to muck with ES aliases/mappings
+        # Q: Why not just send the httpx json data as is?
+        # A: I wanted to stay consistent with nuclei's "auto" ES import
+        # and not have to muck with aliases/mappings
         es_data['@timestamp']    = data['timestamp']
         es_data['event']['ip']   = data['host']
         es_data['event']['host'] = data['host']
@@ -176,24 +176,43 @@ def httpx_ScanToEs(json_data,ES_session,api_url,verbose):
         es_data['event']['url']  =  data['url']
         es_data['event']['status-code'] =  data['status-code']
 
+        es_data['event']['jarm'] = ''
+        es_data['event']['page_title'] = ''
+        es_data['event']['webserver'] = ''
+
         es_data['event']['tls'] = {}
+        es_data['event']['tls']['dns_names'] = []
+        es_data['event']['hashes'] = {}
+
+        es_data['event']['hashes']['body-md5'] = ''
+        es_data['event']['hashes']['body-mmh3'] = ''
+        es_data['event']['hashes']['body-sha256'] = ''
+        es_data['event']['hashes']['body-simhash'] = ''
+        es_data['event']['hashes']['header-md5'] = ''
+        es_data['event']['hashes']['header-mmh3'] = ''
+        es_data['event']['hashes']['header-sha256'] = ''
+        es_data['event']['hashes']['header-simhash'] = ''
+
         if 'tls-grab' in data.keys():
            es_data['event']['tls']['version'] = data['tls-grab']['tls_version']
 
-           es_data['event']['tls']['dns_names'] = []
            if 'dns_names' in data['tls-grab'].keys():
               es_data['event']['tls']['dns_names'] = data['tls-grab']['dns_names']
 
         if 'technologies' in data.keys():
            es_data['event']['meta']['technologies'] = data['technologies']
 
-        es_data['event']['page_title'] = ''
         if 'title' in data.keys():
            es_data['event']['page_title'] = data['title']
 
-        es_data['event']['webserver'] = ''
         if 'webserver' in data.keys():
            es_data['event']['webserver'] = data['webserver']
+
+        if 'hashes' in data.keys():
+           es_data['event']['hashes'] = data['hashes']
+
+        if 'jarm' in data.keys():
+           es_data['event']['jarm'] = data['jarm']
 
         # Not sure why httpx is not returning asn info for some ip's
         # seems if there is two ASN records returned, it fails? cymru?

@@ -109,7 +109,6 @@ _configf="${_confdir}/santacruz.yml"
 _nmap_bin='/usr/local/bin/nmap'
 _nmap_rundir="${_rundir}/nmap"
 _nmap_logdir="${_logdir}/nmap"
-_nmap2es="${_scriptdir}/nmap2es.py"
 _nmapparse="${_scriptdir}/nmapparse.py"
 
 # httpx
@@ -139,7 +138,7 @@ pre_scan() {
 	done
 
 	# check files
-	chk_files=(${_nmap2es} ${_nmapparse} ${_httpxnse} ${_configf} ${_nucleiconf})
+	chk_files=(${_nmapparse} ${_httpxnse} ${_configf} ${_nucleiconf})
 	for _file in "${chk_files[@]}"; do
 		if [ ! -f ${_file} ]; then
 			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] - file does not exist, ${_file}"
@@ -300,7 +299,7 @@ run_scan() {
 	#------------------------------------------------------------------------------------#
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] - httpx_scan, started ..."
 	export GODEBUG=tls10default=1
-	${_httpx_bin} -silent -nc -sc -td -tls-grab -title -fhr -ec -asn -maxr 5 -location -web-server -timeout 3 -list ${_httpx_targets} -json > ${_httpx_log}
+	${_httpx_bin} -silent -nc -sc -td -tls-grab -title -fhr -ec -asn -location -web-server -jarm -maxr 5 -timeout 3 -list ${_httpx_targets} -json > ${_httpx_log}
 
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] - httpx_scan, completed (log: ${_httpx_log})"
 
