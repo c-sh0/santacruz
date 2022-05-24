@@ -28,17 +28,27 @@ The easiest approach when setting passwords is by following the steps below othe
 2. Change the default passwords for all built-in users, make note of the output.<br>
    ```docker exec elasticsearch /bin/bash -c "bin/elasticsearch-setup-passwords auto --batch"```
 
-3. Update the Kibana and Santacruz configuration files with generated password from #2<br>
+3. Since this is a `single-node` cluster, for all newly created indexes, create an index template that will set `number_of_replicas` to `0`
+      ```sh
+      curl -X PUT 'http://localhost:9200/_template/template_1' \
+      -H 'Content-Type: application/json' \
+      -d '{"index_patterns":["*"],"order":0,"settings":{"number_of_shards":1,"number_of_replicas": 0}}' \
+      -u elastic:<password from #2>
+      ```
+      Refer to the documentation for more information and settings.<br>
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates-v1.html
+
+4. Update the Kibana and Santacruz configuration files with generated password from #2<br>
    ```conf/kibana.yml```<br>
    ```conf/santacruz.yml```
 
-4. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)<br>
+5. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)<br>
    ```docker-compose up -d kibana && docker logs kibana --follow```
 
-5. Login into the Kibana dashboard (user: elastic, password from #2)<br>
+6. Login into the Kibana dashboard (user: elastic, password from #2)<br>
    ```http://your.ip:5601/```
 
-6. (Optional) Add additional users: **Stack Management** -> **Users**
+7. (Optional) Add additional users: **Stack Management** -> **Users**
 
 ### Optional
 By default, containers will not automaticaly start on system boot. The following commands will start the containers when docker starts
