@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ========================================================================================
-# Read nmap XML output, send to ES
+# Read scan log output, send to ES
 #
 # [/csh:]> date "+%D"
 # 04/11/22
@@ -28,7 +28,7 @@ from urllib.parse import urlparse
 #logging.basicConfig(filename='nmap2es.log', level=logging.DEBUG)
 ###
 # ================================================================================================================
-# Original version of the parser can be found here:
+# Original version of the nmap parser can be found here:
 #    https://raw.githubusercontent.com/ChrisRimondi/VulntoES/master/VulntoES.py
 # Alt Version:
 #    https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
