@@ -156,6 +156,61 @@ def port_ScanToEs(xml_root,ES_session,api_url,verbose):
                           send2ES(ES_session,api_url,es_data,verbose)
 
 
+def httpx_ScanToEs(json_data,ES_session,api_url,verbose):
+    for log_line in json_data:
+        es_data = set_dict('Httpx Discovery Scan','info',['httpx','discovery','network'])
+        data    = json.loads(log_line)
+
+       # Q: Why not just send the httpx json data as is?
+       # A: I wanted to stay consistent with nuclei's "auto" ES import
+       # and not have to muck with ES aliases/mappings
+        es_data['@timestamp']    = data['timestamp']
+        es_data['event']['ip']   = data['host']
+        es_data['event']['host'] = data['host']
+        es_data['event']['port'] = data['port']
+        es_data['event']['protocol'] = 'tcp'
+
+        es_data['event']['method'] = data['method']
+        es_data['event']['scheme'] = data['scheme']
+        es_data['event']['path'] = data['path']
+        es_data['event']['url']  =  data['url']
+        es_data['event']['status-code'] =  data['status-code']
+
+        es_data['event']['tls'] = {}
+        if 'tls-grab' in data.keys():
+           es_data['event']['tls']['version'] = data['tls-grab']['tls_version']
+
+           es_data['event']['tls']['dns_names'] = []
+           if 'dns_names' in data['tls-grab'].keys():
+              es_data['event']['tls']['dns_names'] = data['tls-grab']['dns_names']
+
+        if 'technologies' in data.keys():
+           es_data['event']['meta']['technologies'] = data['technologies']
+
+        es_data['event']['page_title'] = ''
+        if 'title' in data.keys():
+           es_data['event']['page_title'] = data['title']
+
+        es_data['event']['webserver'] = ''
+        if 'webserver' in data.keys():
+           es_data['event']['webserver'] = data['webserver']
+
+        # Not sure why httpx is not returning asn info for some ip's
+        # seems if there is two ASN records returned, it fails? cymru?
+        if 'asn' in data.keys():
+           es_data['event']['asn']        = data['asn']['as-number'].replace('AS','')
+           es_data['event']['asn_cc']     = data['asn']['as-country']
+           es_data['event']['asn_name']   = data['asn']['as-name']
+           es_data['event']['asn_handle'] = data['asn']['as-number']
+           es_data['event']['asn_prefix'] = data['asn']['as-range']
+        else:
+          as_data = asLookup(es_data['event']['ip'])
+          es_data['event'] = merge_two_dicts(es_data['event'], as_data)
+
+        send2ES(ES_session,api_url,es_data,verbose)
+        #print(f"{es_data}")
+        #sys.exit()
+
 def merge_two_dicts(x, y):
     z = x.copy()   # start with x's keys and values
     z.update(y)    # modifies z with y's keys and values & returns None
@@ -233,6 +288,7 @@ def main():
     opt_args = parser.parse_args()
     scan_type = opt_args.type.strip()
 
+    # read ES configuration
     conf = yaml.safe_load(opt_args.config)
     if conf['elasticsearch']['ssl']:
        es_host = 'https://' + conf['elasticsearch']['ip']
@@ -243,21 +299,29 @@ def main():
     es_user  = conf['elasticsearch']['username']
     es_pass  = conf['elasticsearch']['password']
 
-    xml_tree = xml.parse(opt_args.file)
-    xml_root = xml_tree.getroot()
-    opt_args.file.close()
-
-    # Build index URL
-    index_URL = es_host + '/nmap_' + scan_type + '/_doc'
-
     # ES Session
     es_session = init_ESSession(es_user,es_pass,es_host,opt_args.verbose)
 
+    # index/data based on --type
+    if scan_type == 'httpx':
+        index_URL = es_host + '/httpx/_doc'
+        scan_data = opt_args.file.readlines()
+    else:
+        index_URL = es_host + '/nmap_' + scan_type + '/_doc'
+        xml_tree = xml.parse(opt_args.file)
+        scan_data = xml_tree.getroot()
+
+    opt_args.file.close()
+
+    # send data to ES
     if scan_type == 'portscan':
-       port_ScanToEs(xml_root,es_session,index_URL,opt_args.verbose)
+       port_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
 
     elif scan_type == 'discovery':
-       discovery_ScanToEs(xml_root,es_session,index_URL,opt_args.verbose)
+       discovery_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
+
+    elif scan_type == 'httpx':
+       httpx_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
 
     else:
       print(f"[ERROR]: Unknown nmap scan type, {opt_args.type}")
