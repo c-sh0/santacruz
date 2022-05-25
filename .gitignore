@@ -1,9 +1,10 @@
 data/
 nuclei_templates/
+temp/
+tmp/
 .idea/
 .vscode/
 .git/
-resume.cfg
 .env
 *.sw*
 *.swp
@@ -18,3 +19,9 @@ resume.cfg
 *.out
 *.txt
 *.log
+*.json
+*.xml
+*.csv
+*.tmp
+*.temp
+*~
