@@ -34,7 +34,6 @@ from urllib.parse import urlparse
 #    https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
 # Note:
 # Service detection information is not sent. (let's be honest, it's not useful and often unreliable by default)
-#
 # ================================================================================================================
 def set_dict(name,sev,tags):
     d = {}
@@ -52,7 +51,8 @@ def send2ES(es_session,es_url,data,verbose):
     # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
     index_uuid = uuid_from_string(json.dumps(data))
-    document_url = es_url + "/" + index_uuid + "?op_type=create"
+    document_url = es_url + '/' + index_uuid + '?op_type=create'
+
     print(f"[INFO]: ES create: {document_url}")
 
     if verbose:
@@ -75,6 +75,8 @@ def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
         for stats in r.getchildren():
             if stats.tag == 'finished':
                scan_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(stats.attrib['time'])))
+               idx_date  = time.strftime('%Y%m%d', time.gmtime(float(stats.attrib['time'])))
+               idx_url   = api_url + '/nmap_discovery_' + idx_date + '/_doc'
 
     for h in xml_root.iter('host'):
        es_data = set_dict('Nmap Discovery Scan','info',['nmap','discovery','network'])
@@ -97,7 +99,7 @@ def discovery_ScanToEs(xml_root,ES_session,api_url,verbose):
           as_data = asLookup(es_data['event']['ip'])
           es_data['event'] = merge_two_dicts(es_data['event'], as_data)
 
-          send2ES(ES_session,api_url,es_data,verbose)
+          send2ES(ES_session,idx_url,es_data,verbose)
           #print(es_data)
           #sys.exit()
 
@@ -108,6 +110,8 @@ def port_ScanToEs(xml_root,ES_session,api_url,verbose):
        if h.tag == 'host':
            if 'endtime' in h.attrib and h.attrib['endtime']:
                es_data['@timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(h.attrib['endtime'])))
+               idx_date  = time.strftime('%Y%m%d', time.gmtime(float(h.attrib['endtime'])))
+               idx_url = api_url + '/nmap_portscan_' + idx_date + '/_doc'
 
        for c in h:
            if c.tag == 'address':
@@ -153,13 +157,15 @@ def port_ScanToEs(xml_root,ES_session,api_url,verbose):
                              es_data['event']['meta']['hostname'] = "unknwon"
 
                           # Only send document to ES if the port is open
-                          send2ES(ES_session,api_url,es_data,verbose)
+                          send2ES(ES_session,idx_url,es_data,verbose)
 
 
 def httpx_ScanToEs(json_data,ES_session,api_url,verbose):
     for log_line in json_data:
-        es_data = set_dict('Httpx Discovery Scan','info',['httpx','discovery','network'])
-        data    = json.loads(log_line)
+        es_data  = set_dict('Httpx Discovery Scan','info',['httpx','discovery','network'])
+        data     = json.loads(log_line)
+        idx_date = data['timestamp'].split('T')[0].replace('-','')
+        idx_url  = api_url + '/httpx_' + idx_date + '/_doc'
 
         # Q: Why not just send the httpx json data as is?
         # A: I wanted to stay consistent with nuclei's "auto" ES import
@@ -226,9 +232,7 @@ def httpx_ScanToEs(json_data,ES_session,api_url,verbose):
           as_data = asLookup(es_data['event']['ip'])
           es_data['event'] = merge_two_dicts(es_data['event'], as_data)
 
-        send2ES(ES_session,api_url,es_data,verbose)
-        #print(f"{es_data}")
-        #sys.exit()
+        send2ES(ES_session,idx_url,es_data,verbose)
 
 def merge_two_dicts(x, y):
     z = x.copy()   # start with x's keys and values
@@ -323,10 +327,8 @@ def main():
 
     # index/data based on --type
     if scan_type == 'httpx':
-        index_URL = es_host + '/httpx/_doc'
         scan_data = opt_args.file.readlines()
     else:
-        index_URL = es_host + '/nmap_' + scan_type + '/_doc'
         xml_tree = xml.parse(opt_args.file)
         scan_data = xml_tree.getroot()
 
@@ -334,13 +336,13 @@ def main():
 
     # send data to ES
     if scan_type == 'portscan':
-       port_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
+       port_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
 
     elif scan_type == 'discovery':
-       discovery_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
+       discovery_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
 
     elif scan_type == 'httpx':
-       httpx_ScanToEs(scan_data,es_session,index_URL,opt_args.verbose)
+       httpx_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
 
     else:
       print(f"[ERROR]: Unknown nmap scan type, {opt_args.type}")

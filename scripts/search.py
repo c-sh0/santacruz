@@ -31,7 +31,7 @@ def p_results(es_idx,data,out):
         iname = d['event']['info']['name']
 
         #print(json.dumps(d))
-        if es_idx == 'nmap_portscan':
+        if 'nmap_portscan' in es_idx:
                 port      = d['event']['port']
                 hname     = d['event']['hostname']
                 proto     = d['event']['protocol']
@@ -49,7 +49,7 @@ def p_results(es_idx,data,out):
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t{hname}\t{port}\t{state}\t{proto}\t{script}\t{script_op}")
 
-        elif es_idx == 'nmap_discovery':
+        elif 'nmap_discovery' in es_idx:
                 h_state   = d['event']['state']
                 asn       = d['event']['asn']
                 as_cc     = d['event']['asn_cc']
@@ -64,7 +64,7 @@ def p_results(es_idx,data,out):
                 else:
                    print(f"{es_idx}: {ts}\t{ip}\t{h_state}\t{as_prefix}\t{asn}\t{as_handle}\t{as_name}\t{as_cc}\t{as_source}")
 
-        elif es_idx == 'httpx':
+        elif 'httpx' in es_idx:
                 tlsns   = ''
                 ts      = ts.split('.', 1)[0] # clean timstamp
                 url     = d['event']['url']
@@ -86,7 +86,7 @@ def p_results(es_idx,data,out):
                 else:
                    print(f"{es_idx}: {ts}\t{sev}\t{url}\t{sc}\t{tlsv}\t{ws}\t{tlsns}\t{as_name}\t{pt}")
 
-        elif es_idx == 'nuclei':
+        elif 'nuclei' in es_idx:
                 match_at = d['event']['matched-at']
                 tid = d['event']['template-id']
 
