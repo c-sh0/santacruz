@@ -1,11 +1,7 @@
 ##########################################################################
-#
 # Top 600 ports plus others commonly found (kube, docker, etc..)
-#
 # Ref: https://nmap.org/book/nmap-services.html
-#
 # grep '/tcp' /usr/local/share/nmap/nmap-services | sort -r -k3 | head -600
-#
 ##########################################################################
 discard	9/tcp	0.003764	# sink null
 daytime	13/tcp	0.003927
@@ -264,8 +260,8 @@ apc-2260	2260/tcp	0.000380	# APC 2260
 compaqdiag	2301/tcp	0.001242	# cpq-wbem | Compaq remote diagnostic/management | Compaq HTTP
 docker	2375/tcp	0.000076	# docker.com | Docker REST API (plain text)
 docker	2376/tcp	0.000076	# docker-s | docker.com | Docker REST API (ssl)
-etcd-client	2379/tcp	0.000000	# etcd client communication
-etcd-server	2380/tcp	0.000000	# etcd server to server communication
+etcd-client	2379/tcp	0.003345	# etcd client communication
+etcd-server	2380/tcp	0.003345	# etcd server to server communication
 compaq-https	2381/tcp	0.000380	# Compaq HTTPS
 ms-olap4	2383/tcp	0.001369	# MS OLAP 4 | Microsoft OLAP
 fmpro-fdal	2399/tcp	0.000380	# FileMaker, Inc. - Data Access Layer
@@ -345,9 +341,9 @@ rfe	5002/tcp	0.000765	# Radio Free Ethernet | radio free ethernet
 filemaker	5003/tcp	0.001756	# fmpro-internal | Filemaker Server - http://www.filemaker.com/ti/104289.html | FileMaker, Inc. - Proprietary transport | FileMaker, Inc. - Proprietary name binding
 avt-profile-1	5004/tcp	0.000532	# RTP media data [RFC 3551][RFC 4571] | RTP media data
 avt-profile-2	5005/tcp	0.000076	# RTP control protocol [RFC 3551][RFC 4571] | RTP control protocol
-wsm-server	5006/tcp	0.000000	# wsm server
-wsm-server-ssl	5007/tcp	0.000000	# wsm server ssl
-synapsis-edge	5008/tcp	0.000000	# Synapsis EDGE
+wsm-server	5006/tcp	0.003345	# wsm server
+wsm-server-ssl	5007/tcp	0.003345	# wsm server ssl
+synapsis-edge	5008/tcp	0.003345	# Synapsis EDGE
 airport-admin	5009/tcp	0.004416	# winfs | Apple AirPort WAP Administration | Microsoft Windows Filesystem
 telelpathstart	5010/tcp	0.000138	# TelepathStart
 telelpathattack	5011/tcp	0.000088	# TelepathAttack
@@ -361,19 +357,19 @@ unknown	5018/tcp	0.000518	# unknown
 unknown	5019/tcp	0.000518	# unknown
 zenginkyo-1	5020/tcp	0.000076
 zenginkyo-2	5021/tcp	0.000076
-mice	5022/tcp	0.000000	# mice server
+mice	5022/tcp	0.003345	# mice server
 htuilsrv	5023/tcp	0.000076	# Htuil Server for PLD2
-scpi-telnet	5024/tcp	0.000000
-scpi-raw	5025/tcp	0.000000
-strexec-d	5026/tcp	0.000000	# Storix I/O daemon (data)
-strexec-s	5027/tcp	0.000000	# Storix I/O daemon (stat)
-qvr	5028/tcp	0.000000	# Quiqum Virtual Relais
-infobright	5029/tcp	0.000000	# Infobright Database Server
+scpi-telnet	5024/tcp	0.003345
+scpi-raw	5025/tcp	0.003345
+strexec-d	5026/tcp	0.003345	# Storix I/O daemon (data)
+strexec-s	5027/tcp	0.003345	# Storix I/O daemon (stat)
+qvr	5028/tcp	0.003345	# Quiqum Virtual Relais
+infobright	5029/tcp	0.003345	# Infobright Database Server
 surfpass	5030/tcp	0.000380
-dmp	5031/tcp	0.000000	# Direct Message Protocol
-signacert-agent	5032/tcp	0.000000	# SignaCert Enterprise Trust Server Agent
+dmp	5031/tcp	0.003345	# Direct Message Protocol
+signacert-agent	5032/tcp	0.003345	# SignaCert Enterprise Trust Server Agent
 jtnetd-server	5033/tcp	0.000228	# Janstor Secure Data
-jtnetd-status	5034/tcp	0.000000	# Janstor Status
+jtnetd-status	5034/tcp	0.003345	# Janstor Status
 unknown	5035/tcp	0.000518	# unknown
 unknown	5036/tcp	0.000518	# unknown
 unknown	5037/tcp	0.000518	# unknown
@@ -381,14 +377,14 @@ unknown	5038/tcp	0.000518	# unknown
 unknown	5039/tcp	0.000518	# unknown
 unknown	5040/tcp	0.000152
 unknown	5041/tcp	0.000518	# unknown
-asnaacceler8db	5042/tcp	0.000000
-swxadmin	5043/tcp	0.000000	# ShopWorX Administration
-lxi-evntsvc	5044/tcp	0.000000	# LXI Event Service
-osp	5045/tcp	0.000000	# Open Settlement Protocol
-vpm-udp	5046/tcp	0.000000	# Vishay PM UDP Service
-iscape	5047/tcp	0.000000	# iSCAPE Data Broadcasting
-texai	5048/tcp	0.000000	# Texai Message Service
-ivocalize	5049/tcp	0.000000	# iVocalize Web Conference
+asnaacceler8db	5042/tcp	0.003345
+swxadmin	5043/tcp	0.003345	# ShopWorX Administration
+lxi-evntsvc	5044/tcp	0.003345	# LXI Event Service
+osp	5045/tcp	0.003345	# Open Settlement Protocol
+vpm-udp	5046/tcp	0.003345	# Vishay PM UDP Service
+iscape	5047/tcp	0.003345	# iSCAPE Data Broadcasting
+texai	5048/tcp	0.003345	# Texai Message Service
+ivocalize	5049/tcp	0.003345	# iVocalize Web Conference
 mmcc	5050/tcp	0.002584	# multimedia conference control tool
 ida-agent	5051/tcp	0.003649	# ita-agent | Symantec Intruder Alert | ITA Agent
 sip	5060/tcp	0.010613	# Session Initiation Protocol (SIP)
@@ -412,7 +408,7 @@ secureidprop	5510/tcp	0.000339	# ACE/Server services
 sdadmind	5550/tcp	0.000853	# cbus | ACE/Server services | Model Railway control using the CBUS message protocol
 freeciv	5555/tcp	0.001305	# personal-agent | Personal Agent
 westec-connect	5566/tcp	0.000608	# Westec Connect
-esmagent	5601/tcp	0.000000	# Enterprise Security Agent
+esmagent	5601/tcp	0.003345	# Enterprise Security Agent
 pcanywheredata	5631/tcp	0.006248
 beorl	5633/tcp	0.000380	# BE Operations Request Listener
 nrpe	5666/tcp	0.006614	# Nagios NRPE | Nagios Remote Plugin Executor
@@ -452,7 +448,7 @@ unknown	6129/tcp	0.000380
 unknown	6156/tcp	0.000380
 redis	6379/tcp	0.000076	# An advanced key-value cache and store
 clariion-evr01	6389/tcp	0.000380
-sun-sr-https	6443/tcp	0.000000	# Service Registry Default HTTPS Domain
+sun-sr-https	6443/tcp	0.003345	# Service Registry Default HTTPS Domain
 netop-rc	6502/tcp	0.000314	# boks_servm | boks-servm | NetOp Remote Control (by Danware Data A/S) | BoKS Servm
 mythtv	6543/tcp	0.001167	# lds-distrib | lds_distrib
 parsec-master	6580/tcp	0.000380	# Parsec Masterserver
@@ -489,7 +485,7 @@ http-alt	8000/tcp	0.009710	# irdmi | A common alternative http port | iRDMI
 vcom-tunnel	8001/tcp	0.000532	# VCOM Tunnel
 teradataordbms	8002/tcp	0.001216	# Teradata ORDBMS
 mcreport	8003/tcp	0.000076	# Mulberry Connect Reporting Service
-p2pevolvenet	8004/tcp	0.000000	# Opensource Evolv Enterprise Platform P2P Network Node Connection Protocol
+p2pevolvenet	8004/tcp	0.003345	# Opensource Evolv Enterprise Platform P2P Network Node Connection Protocol
 wpl-analytics	8006/tcp	0.000076	# wpl-disc | World Programming analytics | World Programming analytics discovery
 ajp12	8007/tcp	0.000477	# warppipe | Apache JServ Protocol 1.x | I/O oriented cluster computing software
 http	8008/tcp	0.006843	# http-alt | IBM HTTP server | HTTP Alternate
@@ -507,14 +503,14 @@ d-s-n	8086/tcp	0.000380	# Distributed SCADA Networking Rendezvous Port
 simplifymedia	8087/tcp	0.000380	# Simplify Media SPP Protocol
 radan-http	8088/tcp	0.000608	# Radan HTTP
 unknown	8089/tcp	0.000760
-unknown	8092/tcp	0.000760	# unknown 
+unknown	8092/tcp	0.000760	# unknown
 intermapper	8181/tcp	0.000380	# Intermapper network management system
 sophos	8192/tcp	0.000760	# spytechphone | Sophos Remote Management System | SpyTech Phone Service
 sophos	8193/tcp	0.000760	# Sophos Remote Management System
 sophos	8194/tcp	0.000760	# blp1 | Sophos Remote Management System | Bloomberg data API
 unknown	8222/tcp	0.000380
 unknown	8291/tcp	0.000456
-amberon	8301/tcp	0.000000	# Amberon PPC/PPS
+amberon	8301/tcp	0.003345	# Amberon PPC/PPS
 bitcoin	8333/tcp	0.000380	# Bitcoin crypto currency - https://en.bitcoin.it/wiki/Running_Bitcoin
 cvd	8400/tcp	0.000380
 abarsd	8402/tcp	0.000380
@@ -536,8 +532,8 @@ unknown	9003/tcp	0.000228
 unknown	9004/tcp	0.000076
 golem	9005/tcp	0.000076	# Golem Inter-System RPC
 unknown	9006/tcp	0.000518	# unknown
-ogs-client	9007/tcp	0.000000	# Open Grid Services Client
-ogs-server	9008/tcp	0.000000	# Open Grid Services Server
+ogs-client	9007/tcp	0.003345	# Open Grid Services Client
+ogs-server	9008/tcp	0.003345	# Open Grid Services Server
 pichat	9009/tcp	0.000456	# Pichat Server
 sdr	9010/tcp	0.000380	# Secure Data Replicator Protocol
 d-star	9011/tcp	0.000380	# D-Star Routing digital voice+data for amateur radio
@@ -548,11 +544,11 @@ unknown	9071/tcp	0.000608
 glrpc	9080/tcp	0.000380	# Groove GLRPC
 cisco-aqos	9081/tcp	0.000228	# Required for Adaptive Quality of Service
 unknown	9082/tcp	0.000518	# unknown
-emc-pp-mgmtsvc	9083/tcp	0.000000	# EMC PowerPath Mgmt Service
+emc-pp-mgmtsvc	9083/tcp	0.003345	# EMC PowerPath Mgmt Service
 zeus-admin	9090/tcp	0.002747	# websm | Zeus admin server | WebSM
 xmltec-xmlmail	9091/tcp	0.000304
-XmlIpcRegSvc	9092/tcp	0.000000	# Xml-Ipc Server Reg
-copycat	9093/tcp	0.000000	# Copycat database replication service
+XmlIpcRegSvc	9092/tcp	0.003345	# Xml-Ipc Server Reg
+copycat	9093/tcp	0.003345	# Copycat database replication service
 jetdirect	9100/tcp	0.003287	# pdl-datastream | hp-pdl-datastr | HP JetDirect card | PDL Data Streaming Port | Printer PDL Data Stream
 jetdirect	9101/tcp	0.000602	# bacula-dir | HP JetDirect card | Bacula Director
 jetdirect	9102/tcp	0.002133	# bacula-fd | HP JetDirect card. Also used (and officially registered for) Bacula File Daemon (an open source backup system) | Bacula File Daemon
@@ -584,11 +580,11 @@ rxapi	10010/tcp	0.002889	# ooRexx rxapi services
 unknown	10012/tcp	0.000380
 unknown	10024/tcp	0.000380
 unknown	10025/tcp	0.000380
-amanda	10080/tcp	0.000000
+amanda	10080/tcp	0.003345
 unknown	10243/tcp	0.000684
 unknown	10250/tcp	0.000518	# unknown
 unknown	10251/tcp	0.000518	# unknown
-apollo-relay	10252/tcp	0.000000	# Apollo Relay Port
+apollo-relay	10252/tcp	0.003345	# Apollo Relay Port
 unknown	10256/tcp	0.000518	# unknown
 unknown	10257/tcp	0.000518	# unknown
 unknown	10259/tcp	0.000518	# unknown
@@ -600,7 +596,7 @@ unknown	10626/tcp	0.000380
 unknown	10628/tcp	0.000380
 unknown	10629/tcp	0.000380
 sgi-soap	11110/tcp	0.000380	# Data migration facility (DMF) SOAP is a web server protocol to support remote access to DMF
-memcache	11211/tcp	0.000000	# Memory cache service
+memcache	11211/tcp	0.003345	# Memory cache service
 sysinfo-sp	11967/tcp	0.000380	# SysInfo Service Protocol | SysInfo Sercice Protocol
 cce4x	12000/tcp	0.000427	# entextxid | ClearCommerce Engine 4.x (www.clearcommerce.com) | IBM Enterprise Extender SNA XID Exchange
 netbus	12345/tcp	0.000527	# italk | NetBus backdoor trojan or Trend Micro Office Scan | Italk Chat System
@@ -637,7 +633,7 @@ unknown	22939/tcp	0.000380
 unknown	23502/tcp	0.000760
 unknown	24800/tcp	0.000380
 unknown	25734/tcp	0.000380
-k3software-cli	26263/tcp	0.000000	# K3 Software-Client
+k3software-cli	26263/tcp	0.003345	# K3 Software-Client
 flexlm0	27000/tcp	0.000640	# FlexLM license manager additional ports
 unknown	27715/tcp	0.000380
 unknown	28201/tcp	0.000380
