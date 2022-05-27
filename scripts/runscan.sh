@@ -1,10 +1,28 @@
 #!/bin/sh
-#---------------------------------------------------------------#
+# ========================================================================================
 # Scans a list of targets, send results into elasicsearch.
 #
 # [/csh:]> date "+%D"
 # 05/11/22
 #
+#-------------
+# notes
+#-------------
+# nmap:
+# - Latest version of nmap (from source): Nmap now writes filtered ports into the
+#   XML files this could result in large XML logs files when doing full port scans
+#   on a lot of hosts.
+#   See:
+#     https://github.com/nmap/nmap/commit/38671f22259f87f564403dc6e91c1e4216fdb978
+#     https://github.com/nmap/nmap/issues/2478
+#
+#   To disable this, comment out line 605 in output.cc and recompile:
+#       output.cc:605
+#           //output_rangelist_given_ports(LOG_XML, currentr->ports, currentr->count);
+#
+# - Silent option -v0
+#   https://github.com/nmap/nmap/pull/265
+# ========================================================================================
 #################
 # Help function #
 #################
@@ -32,13 +50,16 @@ mkdate() {
 	if [ "${_dtype}" == 'dt' ]; then
 		local _d=`date +"%Y-%m-%d %T.%3N"`
 
+	elif [ "${_dtype}" == 'logf' ]; then
+		local _d=`date +"%m%d%Y-%H"`
+	fi
+
 	elif [ "${_dtype}" == 'today' ]; then
 		local _d=`date +"%m%d%Y"`
 	fi
 
 	echo "${_d}"
 }
-_today="$(mkdate "today")"
 
 ####################
 # Log msg function #
@@ -180,16 +201,17 @@ run_scan() {
 	#------------------------------------------------------------------------------------#
 	# targets/log file vars
 	#------------------------------------------------------------------------------------#
-	_dscan_log="${_nmap_logdir}/dsicovery_scan-${_today}.xml"
-	_pscan_log="${_nmap_logdir}/port_scan-${_today}.xml"
-	_httpx_log="${_httpx_logdir}/httpx_scan.${_today}.json"
+	_dt="$(mkdate "logf")"
+	_dscan_log="${_nmap_logdir}/discovery_scan-${_dt}.xml"
+	_pscan_log="${_nmap_logdir}/port_scan-${_dt}.xml"
+	_httpx_log="${_httpx_logdir}/httpx_scan.${_dt}.json"
 
 	_nmap_excludef="${_datadir}/nmap-excludes.db"
-	_nmap_exclude_tmp="${_datadir}/exclude.$RANDOM$$.${_today}.tmp"
+	_nmap_exclude_tmp="${_datadir}/exclude.$RANDOM$$.${_dt}.tmp"
 
-	_nmap_targets="${_nmap_logdir}/nmap-${_today}.targets"
-	_nuclei_targets="${_nuclei_logdir}/nuclei-${_today}.targets"
-	_httpx_targets="${_httpx_logdir}/httpx-${_today}.targets"
+	_nmap_targets="${_nmap_logdir}/nmap-${_dt}.targets"
+	_nuclei_targets="${_nuclei_logdir}/nuclei-${_dt}.targets"
+	_httpx_targets="${_httpx_logdir}/httpx-${_dt}.targets"
 
 
 	# check for exsiting output files
@@ -213,24 +235,7 @@ run_scan() {
 	fi
 
 	#------------------------------------------------------------------------------------#
-	# Nmap notes:
-	#------------------------------------------------------------------------------------#
-	# * Latest version of nmap (from source): Nmap now writes filtered ports into the
-	#   XML files this could result in large XML logs files when doing full port scans
-	#   on a lot of hosts.
-	#   See:
-	#     https://github.com/nmap/nmap/commit/38671f22259f87f564403dc6e91c1e4216fdb978
-	#     https://github.com/nmap/nmap/issues/2478
-	#
-	#   To disable this, comment out line 605 in output.cc and recompile:
-	#       output.cc:605
-	#           //output_rangelist_given_ports(LOG_XML, currentr->ports, currentr->count);
-	#
-	# * Silent option -v0
-	#   https://github.com/nmap/nmap/pull/265
-	#------------------------------------------------------------------------------------#
-	#------------------------------------------------------------------------------------#
-	# Nmap discovery scan (Phase 00)
+	# Nmap discovery scan
 	#------------------------------------------------------------------------------------#
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] discovery_scan, started ..."
 
@@ -249,9 +254,8 @@ run_scan() {
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [NMAP] port_scan, creating targets file: ${_nmap_targets}"
 	${_nmapparse} --file ${_dscan_log} --output ip > ${_nmap_targets}
 
-
 	#------------------------------------------------------------------------------------#
-	# Nmap port discovery scan (Phase 01)
+	# Nmap port discovery scan
 	#------------------------------------------------------------------------------------#
 	# Use custom nmap-services file for default port scanning. (--datadir)
 	# https://nmap.org/book/nmap-services.html
@@ -283,7 +287,7 @@ run_scan() {
 	rm -f ${_nmap_exclude_tmp}
 
 	#------------------------------------------------------------------------------------#
-	# httpx scan (Phase 02)
+	# httpx scan
 	#------------------------------------------------------------------------------------#
 	# Parse nmap port scan results, find ports running http services
 	# --skip-gt (Skip hosts who report >= 100 open ports, chances are that there is a
@@ -299,7 +303,7 @@ run_scan() {
 	#------------------------------------------------------------------------------------#
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] httpx_scan, started ..."
 	export GODEBUG=tls10default=1
-	${_httpx_bin} -silent -nc -sc -td -tls-grab -title -fhr -ec -asn -location -web-server -jarm -maxr 5 -timeout 3 -list ${_httpx_targets} -json > ${_httpx_log}
+	${_httpx_bin} -silent -nc -sc -td -tls-grab -title -fhr -ec -location -web-server -jarm -maxr 5 -timeout 3 -list ${_httpx_targets} -json > ${_httpx_log}
 
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [HTTPX] httpx_scan, completed, log: ${_httpx_log}"
 
