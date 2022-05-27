@@ -6,18 +6,32 @@
 # 04/11/22
 # https://github.com/c-sh0
 #
-# nmap has yet to add a json output feature
-# https://github.com/nmap/nmap/issues/635
 #-------------
 # notes
 #-------------
 # nmap:
-# * Other nmap -> ES parser versions:
+# - Default service detection information is not sent. (it's not useful and often wrong)
+# - Has yet to add a json output feature: https://github.com/nmap/nmap/issues/635
+# - nmap to ES parsers (others):
 #    - https://raw.githubusercontent.com/ChrisRimondi/VulntoES/master/VulntoES.py
 #    - https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
-# * Default service detection information is not sent. (it's not useful and often wrong)
-# ========================================================================================
+#
+# IP ASN:
+# - The aslookup python can use cymru or shadowserver
+#   * cymru:
+#      - Uses DNS TXT query for ASN information. (*.origin.asn.cymru.com)
+#        sometimes this will return multiple roundrobin results that can differ.
+#        > dig +short <reverse ip addr>.origin.asn.cymru.com TXT
+#      - IPs that are seen abusing the whois server with large numbers of individual queries instead
+#        of using the bulk netcat interface will be null routed.
+#      - https://team-cymru.com/community-services/ip-asn-mapping/
+#   * shadowserver:
+#      - Note: Rate limiting by source IP is set to 10 queries per second.
+#      - https://www.shadowserver.org/what-we-do/network-reporting/api-asn-and-network-queries/
+#
+# ====================================================================================================
 import os
+import platform
 import sys
 import json
 import time
@@ -32,10 +46,8 @@ import xml.etree.ElementTree as xml
 from aslookup.exceptions import LookupError
 from aslookup import get_as_data
 from urllib.parse import urlparse
-###
-#import logging
-#logging.basicConfig(filename='nmap2es.log', level=logging.DEBUG)
-###
+
+# default ES feild mappings for all indices
 def es_dict(name,desc,sev,tags):
     d = {}
     d['@timestamp']  = ''
@@ -52,13 +64,14 @@ def es_dict(name,desc,sev,tags):
     d['meta']['name'] = name
     d['meta']['tags'] = tags
     d['meta']['description'] = desc
+    d['meta']['data_node'] = platform.node()
 
     d['info'] = {}
     d['info']['severity'] = sev
 
     return d
 
-def send2ES(es_session,es_url,data,verbose):
+def send2ES(ctx,es_url,data):
     # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
     # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
@@ -67,19 +80,19 @@ def send2ES(es_session,es_url,data,verbose):
 
     print(f"[INFO]: ES create: {document_url}")
 
-    if verbose:
+    if ctx['verbose']:
        print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(data)}")
 
-    r = es_session.put(document_url, data=json.dumps(data), verify=False)
+    r = ctx['es_session'].put(document_url, data=json.dumps(data), verify=False)
     if r.status_code == 409:
        print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m")
 
-    if verbose:
+    if ctx['verbose']:
        print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
 
     return 1
 
-def discovery_ScanToEs(xml_root,es_session,es_url,verbose):
+def discovery_ScanToEs(ctx,xml_root):
     # get date/time from runstats
     for r in xml_root.iter('runstats'):
         for stats in r.getchildren():
@@ -88,7 +101,7 @@ def discovery_ScanToEs(xml_root,es_session,es_url,verbose):
 
                # ES index (by date)
                idx_date = time.strftime('%Y%m%d', time.gmtime(float(stats.attrib['time'])))
-               idx_url  = es_url + '/nmap_discovery_' + idx_date
+               idx_url  = ctx['idx_url'] + '_' + idx_date
 
     # read file data
     for h in xml_root.iter('host'):
@@ -111,19 +124,20 @@ def discovery_ScanToEs(xml_root,es_session,es_url,verbose):
               elif host.tag == 'status':
                    es_data['info']['state'] = host.attrib['state']
 
-       # send data to ES only if the host is "up"
+       # send data only if the host is "up"
        if es_data['info']['state'] == 'up':
-          # lookup/add ASN info
-          as_data = asn_lookup(es_data['ip'])
-          if len(as_data):
-             es_data = merge_two_dicts(es_data, as_data)
+          # grab ASN info from ES
+          as_data = asn_ESlookup(ctx,es_data['host'],es_data['ip'])
+          if(len(as_data)):
+             es_data = merge_two_dicts(es_data,as_data)
 
-          send2ES(es_session,idx_url,es_data,verbose)
+          # send to ES
+          send2ES(ctx,idx_url,es_data)
 
     return 1
 
 
-def port_ScanToEs(xml_root,es_session,es_url,verbose):
+def port_ScanToEs(ctx,xml_root):
     # read file data
     for h in xml_root.iter('host'):
        es_data = es_dict('nmap','Nmap Port Scan','info',['nmap','portscan','network'])
@@ -133,7 +147,7 @@ def port_ScanToEs(xml_root,es_session,es_url,verbose):
            if 'endtime' in h.attrib and h.attrib['endtime']:
                es_data['@timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(h.attrib['endtime'])))
                idx_date = time.strftime('%Y%m%d', time.gmtime(float(h.attrib['endtime'])))
-               idx_url  = es_url + '/nmap_portscan_' + idx_date
+               idx_url  = ctx['idx_url'] + '_' + idx_date
 
        for c in h:
            if c.tag == 'address':
@@ -173,15 +187,15 @@ def port_ScanToEs(xml_root,es_session,es_url,verbose):
                        if es_data['info']['state'] == 'open':
 
                           # grab ASN info from ES, nmap discovery scan
-                          as_data = asn_ESlookup(es_data['ip'],es_url,es_session,verbose)
+                          as_data = asn_ESlookup(ctx,es_data['host'],es_data['ip'])
                           if(len(as_data)):
                              es_data = merge_two_dicts(es_data,as_data)
 
                           # send to ES
-                          send2ES(es_session,idx_url,es_data,verbose)
+                          send2ES(ctx,idx_url,es_data)
     return 1
 
-def nuclei_ScanToEs(json_data,es_session,es_url,verbose):
+def nuclei_ScanToEs(ctx,json_data):
     # read file
     for jsonl in json_data:
         es_data  = es_dict('nuclei','Nuclei Scanner','info',['nuclei','vulnerability','discovery','network'])
@@ -189,7 +203,7 @@ def nuclei_ScanToEs(json_data,es_session,es_url,verbose):
 
         # ES index (by date)
         idx_date = data['timestamp'].split('T')[0].replace('-','')
-        idx_url  = es_url + '/nuclei_' + idx_date
+        idx_url  = ctx['idx_url'] + '_' + idx_date
 
         es_data['@timestamp']   = data['timestamp']
         es_data['info']         = data['info']
@@ -210,7 +224,8 @@ def nuclei_ScanToEs(json_data,es_session,es_url,verbose):
             es_data['ip'] = data['ip']
 
         # grab ASN info from ES, nmap discovery scan
-        as_data = asn_ESlookup(es_data['ip'],es_url,es_session,verbose)
+        # (host arg blank)
+        as_data = asn_ESlookup(ctx,'',es_data['ip'])
         if(len(as_data)):
            es_data = merge_two_dicts(es_data,as_data)
 
@@ -237,11 +252,11 @@ def nuclei_ScanToEs(json_data,es_session,es_url,verbose):
         del es_data['info']['author']
 
         # send to ES
-        send2ES(es_session,idx_url,es_data,verbose)
+        send2ES(ctx,idx_url,es_data)
 
     return 1
 
-def httpx_ScanToEs(json_data,es_session,es_url,verbose):
+def httpx_ScanToEs(ctx,json_data):
     # read file
     for jsonl in json_data:
         es_data  = es_dict('httpx','Httpx Discovery Scan','info',['httpx','discovery','network'])
@@ -249,7 +264,7 @@ def httpx_ScanToEs(json_data,es_session,es_url,verbose):
 
         # ES index (by date)
         idx_date = data['timestamp'].split('T')[0].replace('-','')
-        idx_url  = es_url + '/httpx_' + idx_date
+        idx_url  = ctx['idx_url'] + '_' + idx_date
 
         es_data['@timestamp'] = data['timestamp']
         es_data['ip']         = data['host']
@@ -261,19 +276,11 @@ def httpx_ScanToEs(json_data,es_session,es_url,verbose):
         es_data['info']['url']   = data['url']
         es_data['info']['status-code'] = data['status-code']
 
-        # not sure why httpx is not returning asn info for some ip's
-        # seems if there is two ASN records returned, it fails? cymru?
-        if 'asn' in data.keys():
-           es_data['asn']        = data['asn']['as-number'].replace('AS','')
-           es_data['asn_cc']     = data['asn']['as-country']
-           es_data['asn_name']   = data['asn']['as-name']
-           es_data['asn_handle'] = data['asn']['as-number']
-           es_data['asn_prefix'] = data['asn']['as-range']
-        else:
-          # grab ASN info from ES, nmap discovery scan
-          as_data = asn_ESlookup(es_data['ip'],es_url,es_session,verbose)
-          if(len(as_data)):
-             es_data = merge_two_dicts(es_data,as_data)
+        # grab ASN info from ES, nmap discovery scan
+        # (host arg blank)
+        as_data = asn_ESlookup(ctx,'',es_data['ip'])
+        if(len(as_data)):
+           es_data = merge_two_dicts(es_data,as_data)
 
         # move tls data into 'info'
         es_data['info']['tls'] = {}
@@ -306,11 +313,11 @@ def httpx_ScanToEs(json_data,es_session,es_url,verbose):
             es_data['info']['jarm'] = data['jarm']
 
         # send to ES
-        send2ES(es_session,idx_url,es_data,verbose)
+        send2ES(ctx,idx_url,es_data)
 
     return 1
 
-def merge_two_dicts(x, y):
+def merge_two_dicts(x,y):
     z = x.copy()   # start with x's keys and values
     z.update(y)    # modifies z with y's keys and values & returns None
     return z
@@ -323,7 +330,7 @@ def uuid_from_string(string):
     return str(uuid.UUID(md5_hex_str))
 
 # do asn lookup
-def asn_lookup(ip_addr,verbose):
+def asn_lookup(ctx,ip_addr):
     d = {}
     services = ['cymru','shadowserver']
 
@@ -345,18 +352,20 @@ def asn_lookup(ip_addr,verbose):
 
     return d
 
-# do asn ES lookup (namp_discovery_* index)
-def asn_ESlookup(ip_addr,es_url,es_session,verbose):
-    # wildcard search, get data from last 24h
-    idx_uri = es_url + '/nmap_discovery_*/_search?filter_path=hits.hits._source'
+# do asn lookup in ES
+# search back 30 days, auto updates if not found
+def asn_ESlookup(ctx,host,ip_addr):
+    idx = ctx['proj_name'] + 'asn_db'
+    check_uri  = ctx['es_host'] + '/_cat/indices/' + idx + '?h=index&format=json'
+    search_uri = ctx['es_host'] + '/' + idx + '/_search?filter_path=hits.hits._source'
 
     # json query
-    es_query = {
+    asn_query = {
             "query": {
                 "bool": {
                     "must": [{"match": {"ip": ip_addr}}],
                     "filter": [
-                           {"range": {"@timestamp": {"gte": "now-24h", "lte": "now"}}}
+                           {"range": {"@timestamp": {"gte": "now-30d", "lte": "now"}}}
                     ]
                 }
             },
@@ -375,49 +384,66 @@ def asn_ESlookup(ip_addr,es_url,es_session,verbose):
             "sort": [{"@timestamp": "desc"}]
     }
 
-    if verbose:
-       print(f"[VERBOSE]: Query URI:  {idx_uri}")
-       print(f"[VERBOSE]: Elasticsearch Query:  {json.dumps(es_query)}")
+    # check for index
+    r = ctx['es_session'].get(check_uri, verify=False)
 
-    # request
-    try:
-       r = es_session.post(idx_uri, data=json.dumps(es_query), verify=False)
-       if r.status_code != 200:
-          print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
-          return sys.exit(-255)
+    # found asndb index
+    if r.status_code == 200:
+       if ctx['verbose']:
+          print(f"[VERBOSE]: Query URI:  {search_uri}")
+          print(f"[VERBOSE]: Elasticsearch Query:  {json.dumps(asn_query)}")
 
-    except requests.exceptions.RequestException as e:
-          raise SystemExit(e)
+       # request
+       try:
+          r = ctx['es_session'].post(search_uri, data=json.dumps(asn_query), verify=False)
+          if r.status_code != 200:
+             print(f"[ERROR]: Response Code: [{r.status_code}]\n {r.content}\n")
+             return sys.exit(-255)
 
-    # format, return results
-    asn_data = {}
-    if len(r.json()):
-       asn_data = r.json()['hits']['hits'][0]['_source']
-       return asn_data
-    else:
-       # fallback: lookup/add ASN info
-       asn_data = asn_lookup(ip_addr,verbose)
-       if len(asn_data):
+       except requests.exceptions.RequestException as e:
+             raise SystemExit(e)
+
+       # record found, return
+       if len(r.json()):
+          asn_data = r.json()['hits']['hits'][0]['_source']
           return asn_data
 
-    return 0
+    # fallthrough: index not found?, create index/record
+    asn_data = asn_lookup(ctx,ip_addr)
+    if len(asn_data):
+        es_data = es_dict('asn','ASN Information','info',['asn','discovery','network'])
+        es_data['@timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(time.time())))
+        es_data['ip'] = ip_addr
+        es_data['host'] = host
+        es_data = merge_two_dicts(es_data,asn_data)
 
-def init_ESSession(user,passwd,api_URL,verbose):
-    if verbose:
-        print(f"[INFO]: Connecting to Elasticsearch: {api_URL}")
+        # send to ES
+        asn_uri = ctx['es_host'] + '/' + idx
+        send2ES(ctx,asn_uri,es_data)
+
+        return asn_data
+
+    # no data? ¯\_(ツ)_/¯
+    else:
+        return asn_data
+
+
+def init_ESsession(ctx):
+    if ctx['verbose']:
+        print(f"[INFO]: Connecting to Elasticsearch: {ctx['es_host']}")
 
     session = requests.Session()
     ctype_header = {"Content-Type": "application/json"}
     session.headers.update(ctype_header)
 
-    if user:
-        userpass = user + ':' + passwd
+    if ctx['es_user']:
+        userpass = ctx['es_user'] + ':' + ctx['es_pass']
         encoded_u = base64.b64encode(userpass.encode()).decode()
         auth_header = {"Authorization" : "Basic %s" % encoded_u}
         session.headers.update(auth_header)
 
     try: # ES connection
-        r = session.get(api_URL, headers=session.headers, verify=False)
+        r = session.get(ctx['es_host'], headers=session.headers, verify=False)
         if r.status_code != 200:
            print(f"[ERROR]: Connection failed, got {r.status_code} response!")
            return sys.exit(-1)
@@ -431,54 +457,58 @@ def main():
     parser = argparse.ArgumentParser(description='Send scan logs to Elasticsearch')
     parser.add_argument('-c','--config', help='[file]\t:- Path to ES configuration yml file', dest='config', metavar='', type=argparse.FileType('r'), required=True)
     parser.add_argument('-f','--file', help='[file]\t:- Path to log file', dest='file', metavar='', type=argparse.FileType('r'), required=True)
-    parser.add_argument('-t','--type', help='[report type]\t:- Scan type [portscan|discovery|httpx|nuclei]', dest='type', metavar='', required=True)
+    parser.add_argument('-t','--type', help='[report type]\t:- [portscan|discovery|httpx|nuclei]', dest='type', metavar='', required=True)
     parser.add_argument('-v','--verbose', help='\t\t:- Verbose output', action='store_true')
     opt_args = parser.parse_args()
 
-    # read ES configuration
-    conf = yaml.safe_load(opt_args.config)
-    if conf['elasticsearch']['ssl']:
-        es_host = 'https://' + conf['elasticsearch']['ip']
+    # Read config, build ctx
+    ctx = {}
+    ctx['verbose'] = opt_args.verbose
+
+    yml_conf = yaml.safe_load(opt_args.config)
+    if yml_conf['elasticsearch']['ssl']:
+       ctx['es_host'] = 'https://' + yml_conf['elasticsearch']['ip']
     else:
-        es_host = 'http://' + conf['elasticsearch']['ip']
+       ctx['es_host'] = 'http://' + yml_conf['elasticsearch']['ip']
 
-    es_host += ':' + str(conf['elasticsearch']['port'])
-    es_user  = conf['elasticsearch']['username']
-    es_pass  = conf['elasticsearch']['password']
+    ctx['es_host']   += ':' + str(yml_conf['elasticsearch']['port'])
+    ctx['es_user']    = yml_conf['elasticsearch']['username']
+    ctx['es_pass']    = yml_conf['elasticsearch']['password']
+    ctx['proj_name']  = yml_conf['elasticsearch']['index-prefix']
+    ctx['idx_url']    = ctx['es_host'] + '/' + ctx['proj_name'] + opt_args.type
 
-    # ES session
-    es_session = init_ESSession(es_user,es_pass,es_host,opt_args.verbose)
+    # ES Session
+    ctx['es_session'] = init_ESsession(ctx)
 
     # read data, determine file type by extention
     f_info = os.path.splitext(opt_args.file.name)
     f_ext  = f_info[1].replace('.','')
 
+    # data
     if f_ext == 'json':
         scan_data = opt_args.file.readlines()
+        opt_args.file.close() # close fh
 
     elif f_ext == 'xml':
         xml_tree  = xml.parse(opt_args.file)
         scan_data = xml_tree.getroot()
+        opt_args.file.close() # close fh
 
     else:
         print(f"[ERROR]: file type not supported: {f_ext}")
         return -255
 
-    # close fh
-    opt_args.file.close()
-
-    # send data to ES
     if opt_args.type == 'discovery':
-        discovery_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
+        discovery_ScanToEs(ctx,scan_data)
 
     elif opt_args.type == 'portscan':
-        port_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
+        port_ScanToEs(ctx,scan_data)
 
     elif opt_args.type == 'httpx':
-        httpx_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
+        httpx_ScanToEs(ctx,scan_data)
 
     elif opt_args.type == 'nuclei':
-        nuclei_ScanToEs(scan_data,es_session,es_host,opt_args.verbose)
+        nuclei_ScanToEs(ctx,scan_data)
 
     else:
         print(f"[ERROR]: unknown scan type, {opt_args.type}")
