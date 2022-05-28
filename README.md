@@ -6,7 +6,10 @@ Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 * My own version? Yep.
 
 ## Description
-Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features i'll never use nor care about. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
+Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools as well as features that are never used. I needed something simple, lightweight, customisable, and easy to deploy without all the bloat.
+#### For the TL;DR crowd
+* Normalize useful tool output
+* Team Collaboration
 
 # Getting Started
 1. Clone<br>
@@ -64,8 +67,9 @@ See: https://docs.docker.com/config/containers/start-containers-automatically/
 ## Todo
    * Documentation
    * Rename this project
+   * Single CLI tool
    * Logstash/Filebeat? (Doubtful, no need for it here)
-   * More stuff
+   * Other
 
 ## References
 Marco Lancini's writeup: <a href="https://www.marcolancini.it/2018/blog-elk-for-nmap/" target="_blank">Offensive ELK: Elasticsearch for Offensive Security</a><br>
