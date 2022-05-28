@@ -17,7 +17,7 @@
 #    - https://github.com/marco-lancini/docker_offensive_elk/blob/master/extensions/ingestor/VulntoES.py
 #
 # IP ASN:
-# - The aslookup python can use cymru or shadowserver
+# - The aslookup python client can use cymru or shadowserver
 #   * cymru:
 #      - Uses DNS TXT query for ASN information. (*.origin.asn.cymru.com)
 #        sometimes this will return multiple roundrobin results that can differ.
