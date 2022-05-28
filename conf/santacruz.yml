@@ -1,11 +1,6 @@
-#--------------------------#
-# santacruz configuration  #
-#--------------------------------------------------#
-# scripts/santasearch.py
-# Elasticsearch (compatibility with nuclei)        #
-# See: issue-tracker-config.yaml                   #
-# https://github.com/projectdiscovery/nuclei       #
-#--------------------------------------------------#
+#---------------------------#
+# Elasticsearch Config      #
+#---------------------------#
 elasticsearch:
   # IP for elasticsearch instance
   ip: 127.0.0.1
@@ -19,5 +14,5 @@ elasticsearch:
   username: elastic
   # Password is the password for elasticsearch instance
   password: changeme
-  # nuclei index name
-  index-name: nuclei
+  # A prefix for ES data indices
+  index-prefix: project_name_
