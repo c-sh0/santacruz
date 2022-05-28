@@ -62,8 +62,9 @@ See: https://docs.docker.com/config/containers/start-containers-automatically/
 <a href="doc/README.md" target="_blank">doc/README.md</a>
 
 ## Todo
-   * Re-do Documentation
-   * Logstash? (I see no need for it, yet?)
+   * Documentation
+   * Rename this project
+   * Logstash/Filebeat? (Doubtful, no need for it here)
    * More stuff
 
 ## References
