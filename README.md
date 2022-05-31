@@ -7,7 +7,7 @@ Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 
 ## Description
 Having to write custom shell scripts to parse and keep track of all the data from many different security tools is time consuming and often results in a mountain of text files. Other solutions to this problem often include yet more tools, often times a license, and features that are never used. I needed something simple, lightweight, customisable, portable, and easy to deploy without all the "feature" bloat.
-#### For the TL;DR crowd
+#### TL;DR
 * Normalize useful tool output
 * Team Collaboration
 
