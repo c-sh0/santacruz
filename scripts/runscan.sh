@@ -52,7 +52,6 @@ mkdate() {
 
 	elif [ "${_dtype}" == 'logf' ]; then
 		local _d=`date +"%m%d%Y-%H"`
-	fi
 
 	elif [ "${_dtype}" == 'today' ]; then
 		local _d=`date +"%m%d%Y"`
