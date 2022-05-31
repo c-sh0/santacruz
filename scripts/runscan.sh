@@ -142,6 +142,8 @@ _nuclei_conf="${_confdir}/nuclei.yml"
 _nuclei_logdir="${_logdir}/nuclei"
 _nuclei_tpldir="${_datadir}/nuclei-templates"
 
+# send logs to ES script
+_sendtoes="${_scriptdir}/sendlog2es.py"
 
 #####################
 # Pre-scan function #
@@ -159,7 +161,7 @@ pre_scan() {
 	done
 
 	# check files
-	chk_files=(${_nmapparse} ${_httpxnse} ${_configf} ${_nucleiconf})
+	chk_files=(${_nmapparse} ${_httpxnse} ${_configf} ${_nucleiconf} ${_sendtoes})
 	for _file in "${chk_files[@]}"; do
 		if [ ! -f ${_file} ]; then
 			wr_mesg "${FUNCNAME[0]}():${LINENO}, [ERROR] ${FUNCNAME[0]}(), file does not exist: ${_file}"
@@ -315,9 +317,21 @@ run_scan() {
 
 
 	#------------------------------------------------------------------------------------#
-	# Nuclei scan (Phase 03)
+	# Nuclei scan
 	#------------------------------------------------------------------------------------#
 	#------------------------------------------------------------------------------------#
+
+	#------------------------------------------------------------------------------------#
+	# Send scan logs to Elasticsearch
+	#------------------------------------------------------------------------------------#
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [LOG2ES] send_logs, sending ${_dscan_log} to Elasticsearch ..."
+        ${_sendtoes} -c ${_configf} -f ${_dscan_log} -t discovery
+
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [LOG2ES] send_logs, sending ${_pscan_log} to Elasticsearch ..."
+        ${_sendtoes} -c ${_configf} -f ${_pscan_log} -t portscan
+
+	wr_mesg "${FUNCNAME[0]}():${LINENO}, [LOG2ES] send_logs, sending ${_httpx_log} to Elasticsearch ..."
+        ${_sendtoes} -c ${_configf} -f ${_httpx_log} -t httpx
 
 	wr_mesg "${FUNCNAME[0]}():${LINENO}, [INFO] ${FUNCNAME[0]}(), end"
 }
