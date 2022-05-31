@@ -71,21 +71,31 @@ def es_dict(name,desc,sev,tags):
 
     return d
 
-def send2ES(ctx,es_url,data):
+def send2ES(ctx,es_url,es_data):
     # Gererate a uniq index ID (prevent duplicate documents with the same timestamps)
     # https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
-    index_uuid = uuid_from_string(json.dumps(data))
+    # - @timstamp for uuid, use just YYYY/MM/DD rather than full timestamp. The idea here is
+    #   to reduce the number of duplicate documents on a per daily basis.
+    uuid_data = es_data.copy()
+    uuid_data['@timestamp']  = es_data['@timestamp'].split('T')[0].replace('-','')
+
+    index_uuid = uuid_from_string(json.dumps(uuid_data))
     document_url = es_url + '/_doc/' + index_uuid + '?op_type=create'
 
     print(f"[INFO]: ES create: {document_url}")
 
     if ctx['verbose']:
-       print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(data)}")
+       print(f"[VERBOSE]: {document_url}:\n[VERBOSE]: {json.dumps(es_data)}")
 
-    r = ctx['es_session'].put(document_url, data=json.dumps(data), verify=False)
+    r = ctx['es_session'].put(document_url, data=json.dumps(es_data), verify=False)
     if r.status_code == 409:
        print(f"\033[33m[WARN]: Document UUID: {index_uuid} already exists\033[0m")
+
+    # if document was not created (resonse 201) report it
+    elif r.status_code != 201:
+       print(f"[ERROR]: Could not create document, [URI]: {document_url} [RESPONSE_CODE]: [{r.status_code}] [DATA]: {json.dumps(es_data)}")
+       return 0
 
     if ctx['verbose']:
        print(f"[VERBOSE]: Response Code: [{r.status_code}]\n[VERBOSE]: {r.content}\n")
