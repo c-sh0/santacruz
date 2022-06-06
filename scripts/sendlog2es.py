@@ -172,7 +172,7 @@ def port_ScanToEs(ctx,xml_root):
            elif c.tag == 'ports':
                for port in c.getchildren():
                    if port.tag == 'port':
-                       es_data['info']['port'] = port.attrib['portid']
+                       es_data['info']['port'] = int(port.attrib['portid'])
                        es_data['info']['protocol'] = port.attrib['protocol']
                        es_data['info']['script'] = ''
                        es_data['info']['script_output'] = ''
@@ -281,7 +281,7 @@ def httpx_ScanToEs(ctx,json_data):
         es_data['info']['protocol'] = 'tcp'
         es_data['info']['method']   = data['method']
         es_data['info']['scheme']   = data['scheme']
-        es_data['info']['port']  = data['port']
+        es_data['info']['port']  = int(data['port'])
         es_data['info']['path']  = data['path']
         es_data['info']['url']   = data['url']
         es_data['info']['status-code'] = data['status-code']
@@ -397,7 +397,7 @@ def asn_ESlookup(ctx,host,ip_addr):
     # check for index
     r = ctx['es_session'].get(check_uri, verify=False)
 
-    # found asndb index
+    # found asn db index
     if r.status_code == 200:
        if ctx['verbose']:
           print(f"[VERBOSE]: Query URI:  {search_uri}")
@@ -420,14 +420,18 @@ def asn_ESlookup(ctx,host,ip_addr):
 
     # fallthrough: index not found?, create index/record
     asn_data = asn_lookup(ctx,ip_addr)
+
     if len(asn_data):
         es_data = es_dict('asn','ASN Information','info',['asn','discovery','network'])
         es_data['@timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(float(time.time())))
         es_data['ip'] = ip_addr
         es_data['host'] = host
-        es_data = merge_two_dicts(es_data,asn_data)
+
+        # convert asn to int()
+        asn_data['asn'] = int(asn_data['asn'])
 
         # send to ES
+        es_data = merge_two_dicts(es_data,asn_data)
         asn_uri = ctx['es_host'] + '/' + idx
         send2ES(ctx,asn_uri,es_data)
 
