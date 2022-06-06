@@ -1,6 +1,6 @@
-#---------------------------#
-# Elasticsearch Config      #
-#---------------------------#
+#-----------------------#
+# cli configuration     #
+#-----------------------#
 elasticsearch:
   # IP for elasticsearch instance
   ip: 127.0.0.1

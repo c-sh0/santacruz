@@ -123,7 +123,7 @@ _datadir="${_rundir}/data"
 _confdir="${_rundir}/conf"
 _scriptdir="${_rundir}/scripts"
 _logdir="${_datadir}/logs"
-_configf="${_confdir}/santacruz.yml"
+_configf="${_confdir}/cli.yml"
 
 # nmap
 _nmap_bin='/usr/local/bin/nmap'

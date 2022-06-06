@@ -43,7 +43,7 @@ The easiest approach when setting passwords is by following the steps below othe
 
 4. Update the Kibana and Santacruz configuration files with generated password from #2<br>
    ```conf/kibana.yml```<br>
-   ```conf/santacruz.yml```
+   ```conf/cli.yml```
 
 5. Start Kibana container. It will take a min or two to fully start (&& watch logs to make sure it starts)<br>
    ```docker-compose up -d kibana && docker logs kibana --follow```

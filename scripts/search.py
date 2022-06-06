@@ -3,7 +3,6 @@
 # Sanata Search
 #
 # Retrieve ES data based on tool (nmap,httpx,nuclei, etc..)
-# See: conf/santacruz.yml
 # View README.md for additional information
 #
 # [/csh:]> date "+%D"
@@ -275,7 +274,7 @@ def chk_timef(st):
 
 def main():
     parser = argparse.ArgumentParser(description='-: Santa Search :-', epilog="View doc/README.md for extented help.\n", formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c','--config', help='[file]\t:- Path to configuration file (santacruz.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
+    parser.add_argument('-c','--config', help='[file]\t:- Path to cli configuration file (conf/cli.yml)', dest='config', metavar='', type=argparse.FileType('r'), required=True)
     parser.add_argument('-a','--addr',  help='[ip_addr]\t:- Search for IP address', dest='addr', metavar='', action='store')
     parser.add_argument('-i','--index', help='[index name]\t:- Get data from index name (default: all)', default="all", dest='index', metavar='', action='store')
     parser.add_argument('-s','--start', help='[datetime]\t:- Search from start datetime\n\t\t\t[YYYY/MM/DD HH:MM:SS | now|now-N(d|w|m|h|y)] (default: now-24h)', default="now-24h", dest='start', metavar='', action='store')
