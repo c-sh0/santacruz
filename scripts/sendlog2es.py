@@ -151,6 +151,8 @@ def port_ScanToEs(ctx,xml_root):
     # read file data
     for h in xml_root.iter('host'):
        es_data = es_dict('nmap','Nmap Port Scan','info',['nmap','portscan','network'])
+       es_data['info']['tcp_open'] = []
+       es_data['info']['udp_open'] = []
 
        if h.tag == 'host':
            # ES index, get date/time from scan 'endtime'
@@ -170,39 +172,57 @@ def port_ScanToEs(ctx,xml_root):
                        es_data['host'] = names.attrib['name']
 
            elif c.tag == 'ports':
+               es_data['info']['ports'] = []
+
                for port in c.getchildren():
                    if port.tag == 'port':
-                       es_data['info']['port'] = int(port.attrib['portid'])
-                       es_data['info']['protocol'] = port.attrib['protocol']
-                       es_data['info']['script'] = ''
-                       es_data['info']['script_output'] = ''
+                       ports = {}
+                       ports['id'] = int(port.attrib['portid'])
+                       ports['protocol'] = port.attrib['protocol']
+                       ports['script'] = ''
+                       ports['script_output'] = ''
 
                        for p in port.getchildren():
                            if p.tag == 'state':
-                               es_data['info']['state'] = p.attrib['state']
+                               ports['state'] = p.attrib['state']
 
                            # save any nse script output
                            elif p.tag == 'script':
                                if p.attrib['id']:
                                   if p.attrib['output']:
-                                     es_data['info']['script'] = p.attrib['id']
+                                     ports['script'] = p.attrib['id']
 
                                      # clean up script output
                                      s0  = p.attrib['output'].replace('\n','')
                                      s1  = re.sub('\\\\x00', '', s0)
                                      s2  = s1.replace('[]','').lstrip()
-                                     es_data['info']['script_output'] = re.sub(' +',' ',s2)
+                                     ports['script_output'] = re.sub(' +',' ',s2)
 
-                       # only send document to ES if the port is open
-                       if es_data['info']['state'] == 'open':
+                       # only save if port is open
+                       if ports['state'] == 'open':
+                          es_data['info']['ports'].append(ports)
 
-                          # grab ASN info from ES, nmap discovery scan
-                          as_data = asn_ESlookup(ctx,es_data['host'],es_data['ip'])
-                          if(len(as_data)):
-                             es_data = merge_two_dicts(es_data,as_data)
+                          if ports['protocol'] == 'tcp':
+                             es_data['info']['tcp_open'].append(ports['id'])
 
-                          # send to ES
-                          send2ES(ctx,idx_url,es_data)
+                          elif ports['protocol'] == 'udp':
+                             es_data['info']['udp_open'].append(ports['id'])
+
+
+       # only send data if open ports are found
+       if len(es_data['info']['ports']):
+           es_data['info']['port_count'] = len(es_data['info']['ports'])
+
+           # grab ASN info from ES (nmap discovery scan index)
+           as_data = asn_ESlookup(ctx,es_data['host'],es_data['ip'])
+           if(len(as_data)):
+              es_data = merge_two_dicts(es_data,as_data)
+
+           # send to ES
+           send2ES(ctx,idx_url,es_data)
+           #print(json.dumps(es_data))
+           #sys.exit()
+
     return 1
 
 def nuclei_ScanToEs(ctx,json_data):
