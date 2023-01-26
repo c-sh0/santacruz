@@ -304,7 +304,7 @@ def httpx_ScanToEs(ctx,json_data):
         es_data['info']['port']  = int(data['port'])
         es_data['info']['path']  = data['path']
         es_data['info']['url']   = data['url']
-        es_data['info']['status-code'] = data['status-code']
+        es_data['info']['status_code'] = data['status_code']
 
         # grab ASN info from ES, nmap discovery scan
         # (host arg blank)
