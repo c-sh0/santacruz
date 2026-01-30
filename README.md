@@ -1,5 +1,5 @@
 # Santacruz
-**Status**: *In Development*
+**Status**: *Dead*
 
 Elasticsearch and Kibana setup for Penetration testing and reconnaissance.
 * An Original Idea? Nope.
